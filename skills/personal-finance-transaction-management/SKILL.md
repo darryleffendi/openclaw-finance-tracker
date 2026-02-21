@@ -1,6 +1,6 @@
 ---
 name: personal-finance-transaction-management
-description: Manage personal finance transactions. Use this skill when the user wants to record income or expenses, query transactions, get summaries, or when a new query type is needed that the CLI doesn't yet support.
+description: Manage individual finance transactions one at a time. Use this skill when the user wants to record a single income or expense, query transactions, get summaries, delete a record, or when a new query type is needed that the CLI doesn't yet support. For bulk imports from Excel or image files, use the finance-bulk-import skill instead.
 ---
 
 # Personal Finance Transaction Management

@@ -14,5 +14,8 @@ ln -sfn "$REPO_SKILLS/personal-finance-transaction-management" \
 ln -sfn "$REPO_SKILLS/finance-dashboard" \
   "$SKILLS_DIR/finance-dashboard"
 
+ln -sfn "$REPO_SKILLS/finance-bulk-import" \
+  "$SKILLS_DIR/finance-bulk-import"
+
 echo "Done. Symlinks created:"
 ls -la "$SKILLS_DIR" | grep finance
