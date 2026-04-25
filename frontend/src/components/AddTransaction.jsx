@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react"
 import { apiFetch } from "../api"
 
-export default function AddTransaction({ categories, onAdded }) {
+export default function AddTransaction({ accounts, onAdded }) {
   const [form, setForm] = useState({
     amount: "",
     type: "expense",
@@ -12,11 +12,23 @@ export default function AddTransaction({ categories, onAdded }) {
   })
   const [subcategories, setSubcategories] = useState([])
 
+  const relevantAccounts = accounts.filter((a) =>
+    form.type === "income"
+      ? ["income", "holding"].includes(a.type)
+      : ["expense", "savings"].includes(a.type)
+  )
+
   useEffect(() => {
-    const cat = categories.find((c) => c.category === form.category)
-    setSubcategories(cat ? cat.subcategories : [])
+    // Reset category when type changes if selected category is no longer valid
+    const valid = relevantAccounts.find((a) => a.slug === form.category)
+    if (!valid) setForm((f) => ({ ...f, category: "", subcategory: "" }))
+  }, [form.type])
+
+  useEffect(() => {
+    const acct = accounts.find((a) => a.slug === form.category)
+    setSubcategories(acct ? acct.subcategories : [])
     setForm((f) => ({ ...f, subcategory: "" }))
-  }, [form.category, categories])
+  }, [form.category, accounts])
 
   const set = (field) => (e) => setForm((f) => ({ ...f, [field]: e.target.value }))
 
@@ -61,12 +73,12 @@ export default function AddTransaction({ categories, onAdded }) {
       </div>
 
       <div>
-        <label className="text-xs text-gray-400 block mb-1">Category</label>
+        <label className="text-xs text-gray-400 block mb-1">Account</label>
         <select className={inputCls} value={form.category} onChange={set("category")} required>
-          <option value="">Select category...</option>
-          {categories.map((c) => (
-            <option key={c.category} value={c.category}>
-              {c.category}
+          <option value="">Select account...</option>
+          {relevantAccounts.map((a) => (
+            <option key={a.slug} value={a.slug}>
+              {a.display_name}
             </option>
           ))}
         </select>

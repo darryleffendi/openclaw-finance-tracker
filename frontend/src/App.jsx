@@ -11,7 +11,6 @@ export default function App() {
   const [period, setPeriod] = useState("this-month")
   const [transactions, setTransactions] = useState([])
   const [summary, setSummary] = useState(null)
-  const [categories, setCategories] = useState([])
   const [showAdd, setShowAdd] = useState(false)
 
   const fetchData = () => {
@@ -27,12 +26,6 @@ export default function App() {
     fetchData()
   }, [period])
 
-  useEffect(() => {
-    apiFetch(`${API}/categories`)
-      .then((r) => r.json())
-      .then(setCategories)
-  }, [])
-
   const handleAdded = () => {
     setShowAdd(false)
     fetchData()
@@ -43,6 +36,7 @@ export default function App() {
   }
 
   const periods = ["today", "this-week", "this-month", "last-month", "all"]
+  const accounts = summary?.accounts ?? []
 
   return (
     <div className="min-h-screen bg-gray-950 text-white p-6">
@@ -58,7 +52,7 @@ export default function App() {
         </div>
 
         {showAdd && (
-          <AddTransaction categories={categories} onAdded={handleAdded} />
+          <AddTransaction accounts={accounts} onAdded={handleAdded} />
         )}
 
         <div className="flex gap-2 mb-6 flex-wrap">
@@ -76,7 +70,7 @@ export default function App() {
         </div>
 
         {summary && <Summary data={summary} />}
-        {transactions.length > 0 && <Charts transactions={transactions} />}
+        <Charts transactions={transactions} accounts={accounts} />
         <TransactionList transactions={transactions} onDelete={handleDelete} />
       </div>
     </div>

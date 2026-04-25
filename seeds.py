@@ -1,4 +1,5 @@
-import json
+# Seed data — used only by database.init_db() to populate the accounts table on first run.
+# After seeding, the DB is the source of truth. Do not use this file at runtime.
 
 ACCOUNTS = [
     {
@@ -27,10 +28,10 @@ ACCOUNTS = [
     },
     {
         "slug": "food",
-        "display_name": "Food & Nutrition",
+        "display_name": "Food",
         "type": "expense",
-        "monthly_budget": 2_343_000,
-        "subcategories": ["dine", "gofood", "grabfood", "snack", "supplements"],
+        "monthly_budget": 2_100_000,
+        "subcategories": ["dine", "gofood", "grabfood", "snack"],
         "sort_order": 4,
     },
     {
@@ -46,15 +47,15 @@ ACCOUNTS = [
         "display_name": "Transport",
         "type": "expense",
         "monthly_budget": 300_000,
-        "subcategories": ["gojek", "grab", "flazz", "krl", "parkir"],
+        "subcategories": ["gopay", "ovo", "flazz"],
         "sort_order": 6,
     },
     {
         "slug": "wellness",
         "display_name": "Wellness & Personal",
         "type": "expense",
-        "monthly_budget": 95_000,
-        "subcategories": ["haircut", "medicine", "doctor"],
+        "monthly_budget": 338_000,
+        "subcategories": ["haircut", "medicine", "nutrition"],
         "sort_order": 7,
     },
     {
@@ -62,7 +63,7 @@ ACCOUNTS = [
         "display_name": "Social & Entertainment",
         "type": "expense",
         "monthly_budget": 850_000,
-        "subcategories": ["netflix", "spotify", "games", "cinema", "clothes", "electronics", "tokopedia", "shopee"],
+        "subcategories": ["hobbies", "social", "shopping"],
         "sort_order": 8,
     },
     {
@@ -74,12 +75,3 @@ ACCOUNTS = [
         "sort_order": 9,
     },
 ]
-
-# Flat list of valid slugs (for CLI validation)
-VALID_CATEGORIES = [a["slug"] for a in ACCOUNTS]
-
-# Map slug -> subcategories for quick lookup
-SUBCATEGORY_MAP = {a["slug"]: a["subcategories"] for a in ACCOUNTS}
-
-# Legacy alias used by some bulk parsers
-CATEGORIES = [{"category": a["slug"], "subcategories": a["subcategories"]} for a in ACCOUNTS]

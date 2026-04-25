@@ -4,6 +4,7 @@ from flask import Flask, jsonify, request, session, redirect
 from flask_cors import CORS
 from authlib.integrations.flask_client import OAuth
 from dotenv import load_dotenv
+from werkzeug.middleware.proxy_fix import ProxyFix
 from database import (
     insert_transaction,
     get_transactions_by_period,
@@ -11,12 +12,14 @@ from database import (
     get_summary,
     get_all_transactions,
     delete_transaction,
+    get_accounts,
+    distribute_salary,
 )
-from constants import CATEGORIES
 
 load_dotenv()
 
 app = Flask(__name__)
+app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
 app.secret_key = os.environ["SECRET_KEY"]
 CORS(app, origins=["http://localhost:5179"], supports_credentials=True)
 
@@ -81,7 +84,7 @@ def list_transactions():
 @login_required
 def create_transaction():
     data = request.json
-    row_id = insert_transaction(
+    txn_id, distributed = insert_transaction(
         amount=data["amount"],
         type=data["type"],
         category=data["category"],
@@ -89,7 +92,10 @@ def create_transaction():
         note=data.get("note"),
         date=data.get("date"),
     )
-    return jsonify({"success": True, "id": row_id}), 201
+    result = {"success": True, "id": txn_id}
+    if distributed:
+        result["distributions"] = distributed
+    return jsonify(result), 201
 
 
 @app.delete("/api/transactions/<int:transaction_id>")
@@ -108,10 +114,30 @@ def summary():
     return jsonify(get_summary(period))
 
 
+@app.get("/api/accounts")
+@login_required
+def accounts():
+    return jsonify(get_accounts())
+
+
 @app.get("/api/categories")
 @login_required
 def categories():
-    return jsonify(CATEGORIES)
+    # Legacy alias — returns accounts in the old {category, subcategories} shape
+    accts = get_accounts()
+    return jsonify([{"category": a["slug"], "subcategories": a["subcategories"]} for a in accts])
+
+
+@app.post("/api/distribute")
+@login_required
+def distribute():
+    data = request.json
+    amount = data.get("amount")
+    if not amount:
+        return jsonify({"error": "amount is required"}), 400
+    source = data.get("source_account", "freelance")
+    result = distribute_salary(amount, source)
+    return jsonify(result), 201
 
 
 if __name__ == "__main__":

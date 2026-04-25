@@ -1,5 +1,6 @@
 *.db
 node_modules/
+frontend/dist/
 __pycache__/
 *.pyc
 *-sa.json
@@ -7,4 +8,3 @@ backup.log
 finance-db-backup/
 .env
 seeds.py
-frontend/dist/
