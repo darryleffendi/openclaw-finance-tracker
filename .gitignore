@@ -7,4 +7,3 @@ __pycache__/
 backup.log
 finance-db-backup/
 .env
-seeds.py

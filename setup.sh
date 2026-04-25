@@ -11,9 +11,6 @@ echo "Creating symlinks..."
 ln -sfn "$REPO_SKILLS/personal-finance-transaction-management" \
   "$SKILLS_DIR/personal-finance-transaction-management"
 
-ln -sfn "$REPO_SKILLS/finance-dashboard" \
-  "$SKILLS_DIR/finance-dashboard"
-
 ln -sfn "$REPO_SKILLS/finance-bulk-import" \
   "$SKILLS_DIR/finance-bulk-import"
 

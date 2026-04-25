@@ -60,9 +60,8 @@ export default function App() {
             <button
               key={p}
               onClick={() => setPeriod(p)}
-              className={`px-3 py-1 rounded text-sm ${
-                period === p ? "bg-indigo-600" : "bg-gray-800 hover:bg-gray-700"
-              }`}
+              className={`px-3 py-1 rounded text-sm ${period === p ? "bg-indigo-600" : "bg-gray-800 hover:bg-gray-700"
+                }`}
             >
               {p}
             </button>
