@@ -10,7 +10,7 @@ Personal finance tracker for Darryl. CLI-first, OpenClaw-driven.
 ## Key Conventions
 - Currency is IDR (Indonesian Rupiah), stored as plain float
 - Dates stored as TEXT in YYYY-MM-DD format
-- `cli.py` is the primary interface — Flask API only runs when dashboard is active
+- `cli.py` is the primary interface for the AI. Flask API is used for the UI dashboard.
 - When adding new query types, always add to both `database.py` and `cli.py`
 
 ## Paths

@@ -3,8 +3,9 @@ import Summary from "./components/Summary"
 import TransactionList from "./components/TransactionList"
 import Charts from "./components/Charts"
 import AddTransaction from "./components/AddTransaction"
+import { apiFetch } from "./api"
 
-const API = "http://localhost:8009/api"
+const API = "/api"
 
 export default function App() {
   const [period, setPeriod] = useState("this-month")
@@ -14,10 +15,10 @@ export default function App() {
   const [showAdd, setShowAdd] = useState(false)
 
   const fetchData = () => {
-    fetch(`${API}/transactions?period=${period}`)
+    apiFetch(`${API}/transactions?period=${period}`)
       .then((r) => r.json())
       .then(setTransactions)
-    fetch(`${API}/summary?period=${period}`)
+    apiFetch(`${API}/summary?period=${period}`)
       .then((r) => r.json())
       .then(setSummary)
   }
@@ -27,7 +28,7 @@ export default function App() {
   }, [period])
 
   useEffect(() => {
-    fetch(`${API}/categories`)
+    apiFetch(`${API}/categories`)
       .then((r) => r.json())
       .then(setCategories)
   }, [])
@@ -38,7 +39,7 @@ export default function App() {
   }
 
   const handleDelete = (id) => {
-    fetch(`${API}/transactions/${id}`, { method: "DELETE" }).then(fetchData)
+    apiFetch(`${API}/transactions/${id}`, { method: "DELETE" }).then(fetchData)
   }
 
   const periods = ["today", "this-week", "this-month", "last-month", "all"]

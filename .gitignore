@@ -5,3 +5,6 @@ __pycache__/
 *-sa.json
 backup.log
 finance-db-backup/
+.env
+seeds.py
+frontend/dist/

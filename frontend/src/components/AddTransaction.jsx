@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react"
-
-const API = "http://localhost:8009/api"
+import { apiFetch } from "../api"
 
 export default function AddTransaction({ categories, onAdded }) {
   const [form, setForm] = useState({
@@ -23,7 +22,7 @@ export default function AddTransaction({ categories, onAdded }) {
 
   const submit = (e) => {
     e.preventDefault()
-    fetch(`${API}/transactions`, {
+    apiFetch(`/api/transactions`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({

@@ -1,0 +1,124 @@
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+.g3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;}
+.mc{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:.875rem 1rem;}
+.mc-label{font-size:12px;color:var(--color-text-secondary);margin-bottom:3px;}
+.mc-val{font-size:19px;font-weight:500;color:var(--color-text-primary);}
+.mc-sub{font-size:11px;color:var(--color-text-secondary);margin-top:1px;}
+.sec{font-size:11px;color:var(--color-text-secondary);font-weight:500;letter-spacing:.05em;margin:1.25rem 0 6px;}
+.card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:.875rem 1.25rem;margin-bottom:10px;}
+.row{display:flex;justify-content:space-between;align-items:flex-start;padding:5px 0;border-bottom:0.5px solid var(--color-border-tertiary);}
+.row:last-child{border-bottom:none;}
+.rl{font-size:13px;color:var(--color-text-primary);}
+.rs{font-size:11px;color:var(--color-text-secondary);margin-top:1px;}
+.ra{font-size:13px;font-weight:500;color:var(--color-text-primary);white-space:nowrap;margin-left:8px;}
+.total-row{display:flex;justify-content:space-between;padding:6px 0 0;margin-top:4px;}
+.divider{border:none;border-top:0.5px solid var(--color-border-tertiary);margin:.5rem 0;}
+.invest{background:var(--color-background-success);border-radius:var(--border-radius-md);padding:.875rem 1rem;margin-top:12px;}
+.invest-l{font-size:12px;color:var(--color-text-success);}
+.invest-v{font-size:26px;font-weight:500;color:var(--color-text-success);}
+.badge{font-size:10px;padding:1px 6px;border-radius:3px;margin-left:5px;vertical-align:middle;}
+.new{background:var(--color-background-info);color:var(--color-text-info);}
+.changed{background:var(--color-background-warning);color:var(--color-text-warning);}
+</style>
+
+<div style="padding:1rem 0;">
+
+<div class="g3" style="margin-bottom:4px;">
+  <div class="mc">
+    <div class="mc-label">Net income</div>
+    <div class="mc-val">Rp19.875jt</div>
+    <div class="mc-sub">after PPh 21</div>
+  </div>
+  <div class="mc">
+    <div class="mc-label">Total spend</div>
+    <div class="mc-val" style="color:var(--color-text-danger);">Rp7,518,000</div>
+    <div class="mc-sub">37.8% of net</div>
+  </div>
+  <div class="mc">
+    <div class="mc-label">Investable</div>
+    <div class="mc-val" style="color:var(--color-text-success);">Rp12,357,000</div>
+    <div class="mc-sub">62.2% savings rate</div>
+  </div>
+</div>
+
+<div class="sec">FIXED OBLIGATIONS</div>
+<div class="card">
+  <div class="row"><div><div class="rl">Rent</div></div><div class="ra">Rp2,700,000</div></div>
+  <div class="row"><div><div class="rl">Electricity</div></div><div class="ra">Rp200,000</div></div>
+  <div class="row"><div><div class="rl">Gym</div></div><div class="ra">Rp230,000</div></div>
+  <div class="row"><div><div class="rl">Claude Pro</div><div class="rs">$20 ≈ Rp330k</div></div><div class="ra">Rp330,000</div></div>
+  <div class="divider"></div>
+  <div class="total-row"><div class="rl" style="font-weight:500;">Subtotal</div><div class="ra">Rp3,460,000</div></div>
+</div>
+
+<div class="sec">FOOD & NUTRITION</div>
+<div class="card">
+  <div class="row"><div><div class="rl">Daily food (warteg/padang)</div><div class="rs">Rp70k avg × 30 days</div></div><div class="ra">Rp2,100,000</div></div>
+  <div class="row"><div><div class="rl">Creatine</div><div class="rs">~Rp87k/mo</div></div><div class="ra">Rp87,000</div></div>
+  <div class="row"><div><div class="rl">Omega-3<span class="badge changed">switched</span></div><div class="rs">Alliwise 3600mg — Rp90k/120 caps ÷ 2mo</div></div><div class="ra">Rp45,000</div></div>
+  <div class="row"><div><div class="rl">Vit D3+K2</div><div class="rs">Bronson — stay, ~Rp71k/mo</div></div><div class="ra">Rp71,000</div></div>
+  <div class="row"><div><div class="rl">Zinc+Copper<span class="badge changed">switched</span></div><div class="rs">Solaray EOD — 100 caps ÷ ~6mo</div></div><div class="ra">Rp40,000</div></div>
+  <div class="divider"></div>
+  <div class="total-row"><div class="rl" style="font-weight:500;">Subtotal</div><div class="ra">Rp2,343,000</div></div>
+</div>
+
+<div class="sec">GROCERIES & PERSONAL CARE<span class="badge new" style="margin-left:6px;">new</span></div>
+<div class="card">
+  <div class="row"><div><div class="rl">Drinking water</div><div class="rs">Morning + evening only, office/gym covered</div></div><div class="ra">Rp100,000</div></div>
+  <div class="row"><div><div class="rl">Shampoo</div><div class="rs">Rp70k / 2 months</div></div><div class="ra">Rp35,000</div></div>
+  <div class="row"><div><div class="rl">Soap</div><div class="rs">Rp40k / 2 months</div></div><div class="ra">Rp20,000</div></div>
+  <div class="row"><div><div class="rl">Facial soap (Hada Labo)</div><div class="rs">Rp40k / month</div></div><div class="ra">Rp40,000</div></div>
+  <div class="row"><div><div class="rl">Moisturizer (Skintific)</div><div class="rs">Rp150k / 3.5 months</div></div><div class="ra">Rp43,000</div></div>
+  <div class="row"><div><div class="rl">Sunscreen (SKIN1004)</div><div class="rs">Rp150k / 3.5 months</div></div><div class="ra">Rp43,000</div></div>
+  <div class="divider"></div>
+  <div class="total-row"><div class="rl" style="font-weight:500;">Subtotal</div><div class="ra">Rp281,000</div></div>
+</div>
+
+<div class="sec">TRANSPORT</div>
+<div class="card">
+  <div class="row"><div><div class="rl">Gojek / KRL / Gocar buffer</div></div><div class="ra">Rp300,000</div></div>
+</div>
+
+<div class="sec">WELLNESS & PERSONAL</div>
+<div class="card">
+  <div class="row"><div><div class="rl">Haircut</div><div class="rs">Rp80–110k avg</div></div><div class="ra">Rp95,000</div></div>
+  <div class="row"><div><div class="rl" style="color:var(--color-text-secondary);text-decoration:line-through;">Massage</div><div class="rs" style="color:var(--color-text-success);">eliminated — fix form instead</div></div><div class="ra" style="color:var(--color-text-success);">Rp0</div></div>
+  <div class="divider"></div>
+  <div class="total-row"><div class="rl" style="font-weight:500;">Subtotal</div><div class="ra">Rp95,000</div></div>
+</div>
+
+<div class="sec">SOCIAL & ENTERTAINMENT</div>
+<div class="card">
+  <div class="row"><div><div class="rl">Dining out / social</div></div><div class="ra">Rp500,000</div></div>
+  <div class="row"><div><div class="rl">Hobbies buffer (boxing etc.)</div><div class="rs">Flexible — big spend once in a while</div></div><div class="ra">Rp200,000</div></div>
+  <div class="row"><div><div class="rl">Shopping<span class="badge changed">trimmed</span></div><div class="rs">Books, clothes — compressed</div></div><div class="ra">Rp150,000</div></div>
+  <div class="divider"></div>
+  <div class="total-row"><div class="rl" style="font-weight:500;">Subtotal</div><div class="ra">Rp850,000</div></div>
+</div>
+
+<div class="divider" style="margin:1rem 0;"></div>
+
+<div class="invest">
+  <div class="invest-l">Available to invest every month</div>
+  <div class="invest-v">Rp12,357,000</div>
+  <div class="invest-l" style="margin-top:2px;">62.2% savings rate</div>
+</div>
+
+<div style="margin-top:12px;background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:.875rem 1rem;">
+  <div style="font-size:12px;color:var(--color-text-secondary);margin-bottom:6px;">Supplement cost savings vs before</div>
+  <div style="display:flex;gap:16px;flex-wrap:wrap;">
+    <div><div style="font-size:11px;color:var(--color-text-secondary);">Omega-3 before</div><div style="font-size:14px;font-weight:500;color:var(--color-text-primary);">Rp83k/mo</div></div>
+    <div style="font-size:18px;color:var(--color-text-secondary);align-self:center;">→</div>
+    <div><div style="font-size:11px;color:var(--color-text-secondary);">Omega-3 after</div><div style="font-size:14px;font-weight:500;color:var(--color-text-success);">Rp45k/mo</div></div>
+    <div style="width:1px;background:var(--color-border-tertiary);margin:0 4px;"></div>
+    <div><div style="font-size:11px;color:var(--color-text-secondary);">Zinc/Cu before</div><div style="font-size:14px;font-weight:500;color:var(--color-text-primary);">Rp83k/mo</div></div>
+    <div style="font-size:18px;color:var(--color-text-secondary);align-self:center;">→</div>
+    <div><div style="font-size:11px;color:var(--color-text-secondary);">Zinc/Cu after</div><div style="font-size:14px;font-weight:500;color:var(--color-text-success);">Rp40k/mo</div></div>
+    <div style="width:1px;background:var(--color-border-tertiary);margin:0 4px;"></div>
+    <div><div style="font-size:11px;color:var(--color-text-secondary);">Total saved</div><div style="font-size:14px;font-weight:500;color:var(--color-text-success);">+Rp81k/mo</div></div>
+  </div>
+</div>
+
+</div>
+
