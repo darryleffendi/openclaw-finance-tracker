@@ -78,7 +78,7 @@ python3 cli.py set-budget --account food --amount 2500000
 
 If the user asks for a query type not yet supported (e.g., "show by date range", "top 5 accounts"):
 
-1. Add a new function to the appropriate `backend/` module (`repositories/transactions.py`, `repositories/accounts.py`, or `services/summary.py`) following the existing patterns
+1. Add a new function to the appropriate `backend/` module (`repositories/transaction_repository.py`, `repositories/account_repository.py`, or `services/summary_service.py`) following the existing patterns
 2. Add a new `--flag` to the `query` subparser in `cli.py`
 3. Handle the new flag in the `elif args.command == "query":` block
 4. Test the new command before responding to the user

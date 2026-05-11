@@ -1,7 +1,7 @@
 from flask import Blueprint, jsonify, request
 
 from backend.auth import login_required
-from backend.services.distribution import distribute_salary
+from backend.services.distribution_service import distribute_salary
 
 bp = Blueprint("distribute", __name__)
 

@@ -1,5 +1,5 @@
-from backend.repositories.accounts import get_accounts
-from backend.repositories.transactions import get_transactions_by_period
+from backend.repositories.account_repository import get_accounts
+from backend.repositories.transaction_repository import get_transactions_by_period
 
 
 def get_summary(period: str = "this-month"):

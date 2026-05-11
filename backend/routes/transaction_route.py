@@ -1,11 +1,11 @@
 from flask import Blueprint, jsonify, request
 
 from backend.auth import login_required
-from backend.repositories.transactions import (
+from backend.repositories.transaction_repository import (
     get_transactions_by_category,
     get_transactions_by_period,
 )
-from backend.services.transactions import delete_transaction, insert_transaction
+from backend.services.transaction_service import delete_transaction, insert_transaction
 
 bp = Blueprint("transactions", __name__, url_prefix="/api/transactions")
 

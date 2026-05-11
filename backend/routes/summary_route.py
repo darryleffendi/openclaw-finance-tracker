@@ -1,7 +1,7 @@
 from flask import Blueprint, jsonify, request
 
 from backend.auth import login_required
-from backend.services.summary import get_summary
+from backend.services.summary_service import get_summary
 
 bp = Blueprint("summary", __name__)
 

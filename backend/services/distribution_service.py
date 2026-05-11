@@ -1,8 +1,8 @@
 from datetime import datetime
 
 from backend.db import get_connection
-from backend.repositories import accounts as accounts_repo
-from backend.repositories import transactions as transactions_repo
+from backend.repositories import account_repository as account_repo
+from backend.repositories import transaction_repository as transaction_repo
 
 
 def distribute_within(conn, salary_amount: float, date: str):
@@ -15,7 +15,7 @@ def distribute_within(conn, salary_amount: float, date: str):
     If salary_amount < total budget: each account gets a proportional share.
     Any surplus stays in the source account (caller's responsibility).
     """
-    targets = accounts_repo.get_distribution_targets(conn)
+    targets = account_repo.get_distribution_targets(conn)
 
     total_budget = sum(t["monthly_budget"] for t in targets)
     if total_budget == 0 or not targets:
@@ -36,7 +36,7 @@ def distribute_within(conn, salary_amount: float, date: str):
         if share <= 0:
             continue
 
-        transactions_repo.insert(
+        transaction_repo.insert(
             conn,
             amount=share,
             type="income",
@@ -45,7 +45,7 @@ def distribute_within(conn, salary_amount: float, date: str):
             note="auto-distribution from salary",
             date=date,
         )
-        accounts_repo.update_balance(conn, target["slug"], share)
+        account_repo.update_balance(conn, target["slug"], share)
         distributed.append({"account": target["slug"], "amount": share})
 
     return distributed

@@ -2,15 +2,15 @@
 import argparse
 import json
 import sys
-from backend.repositories.accounts import get_accounts, update_account_budget
-from backend.repositories.transactions import (
+from backend.repositories.account_repository import get_accounts, update_account_budget
+from backend.repositories.transaction_repository import (
     get_all_transactions,
     get_transactions_by_category,
     get_transactions_by_period,
 )
-from backend.services.distribution import distribute_salary
-from backend.services.summary import get_summary
-from backend.services.transactions import delete_transaction, insert_transaction
+from backend.services.distribution_service import distribute_salary
+from backend.services.summary_service import get_summary
+from backend.services.transaction_service import delete_transaction, insert_transaction
 
 
 def main():

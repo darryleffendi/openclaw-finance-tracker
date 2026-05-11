@@ -4,7 +4,13 @@ from werkzeug.middleware.proxy_fix import ProxyFix
 
 from backend.auth import init_oauth
 from backend.config import CORS_ORIGINS, PORT, SECRET_KEY
-from backend.routes import accounts, auth, distribute, summary, transactions
+from backend.routes import (
+    account_route,
+    auth_route,
+    distribute_route,
+    summary_route,
+    transaction_route,
+)
 
 app = Flask(__name__)
 app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
@@ -13,11 +19,11 @@ CORS(app, origins=CORS_ORIGINS, supports_credentials=True)
 
 init_oauth(app)
 
-app.register_blueprint(auth.bp)
-app.register_blueprint(transactions.bp)
-app.register_blueprint(accounts.bp)
-app.register_blueprint(summary.bp)
-app.register_blueprint(distribute.bp)
+app.register_blueprint(auth_route.bp)
+app.register_blueprint(transaction_route.bp)
+app.register_blueprint(account_route.bp)
+app.register_blueprint(summary_route.bp)
+app.register_blueprint(distribute_route.bp)
 
 
 if __name__ == "__main__":

@@ -1,7 +1,7 @@
 from flask import Blueprint, jsonify
 
 from backend.auth import login_required
-from backend.repositories.accounts import get_accounts
+from backend.repositories.account_repository import get_accounts
 
 bp = Blueprint("accounts", __name__)
 

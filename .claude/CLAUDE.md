@@ -21,9 +21,9 @@ Personal finance tracker for Darryl. CLI-first, OpenClaw-driven.
   - `db.py` — SQLite connection + `init_db()` (runs on import)
   - `auth.py` — OAuth setup + `login_required` decorator
   - `seeds.py` — initial `ACCOUNTS` data
-  - `repositories/` — table-level data access (`transactions.py`, `accounts.py`)
-  - `services/` — cross-table / rule-driven logic (`distribution.py`, `summary.py`)
-  - `routes/` — Flask blueprints (one per resource)
+  - `repositories/` — table-level data access (`transaction_repository.py`, `account_repository.py`)
+  - `services/` — cross-table / rule-driven logic (`transaction_service.py`, `distribution_service.py`, `summary_service.py`)
+  - `routes/` — Flask blueprints, one per resource (`*_route.py`)
 - `frontend/` — Vite + React UI
 
 ## Paths
