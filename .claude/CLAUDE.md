@@ -11,11 +11,24 @@ Personal finance tracker for Darryl. CLI-first, OpenClaw-driven.
 - Currency is IDR (Indonesian Rupiah), stored as plain float
 - Dates stored as TEXT in YYYY-MM-DD format
 - `cli.py` is the primary interface for the AI. Flask API is used for the UI dashboard.
-- When adding new query types, always add to both `database.py` and `cli.py`
+- When adding new query types, always add to both `backend/repositories/` (or `backend/services/`) and `cli.py`
+
+## Layout
+- `cli.py` (root) — AI/skill entry point
+- `backend/` — Flask API
+  - `app.py` — Flask instance + blueprint registration
+  - `config.py` — env vars
+  - `db.py` — SQLite connection + `init_db()` (runs on import)
+  - `auth.py` — OAuth setup + `login_required` decorator
+  - `seeds.py` — initial `ACCOUNTS` data
+  - `repositories/` — table-level data access (`transactions.py`, `accounts.py`)
+  - `services/` — cross-table / rule-driven logic (`distribution.py`, `summary.py`)
+  - `routes/` — Flask blueprints (one per resource)
+- `frontend/` — Vite + React UI
 
 ## Paths
-- DB file: `~/codespace/finance-tracker/finance.db`
-- Skills: `~/codespace/finance-tracker/skills/` (symlinked to `~/.openclaw/workspace/`)
+- DB file: `~/codespace/personal-finance-tracker/finance.db`
+- Skills: `~/codespace/personal-finance-tracker/skills/` (symlinked to `~/.openclaw/workspace/`)
 
 ---
 

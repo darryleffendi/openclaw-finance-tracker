@@ -7,7 +7,7 @@ description: Manage individual finance transactions one at a time. Use this skil
 
 ## Files
 - CLI: `~/codespace/personal-finance-tracker/cli.py`
-- DB logic: `~/codespace/personal-finance-tracker/database.py`
+- Backend code: `~/codespace/personal-finance-tracker/backend/` (repositories + services + routes)
 - Database: `~/codespace/personal-finance-tracker/finance.db`
 
 ## Inserting a Transaction
@@ -85,7 +85,7 @@ python3 cli.py wipe --confirm
 
 If the user asks for a query type not yet supported (e.g., "show by date range", "top 5 accounts"):
 
-1. Add a new function to `database.py` following the existing patterns
+1. Add a new function to the appropriate `backend/` module (`repositories/transactions.py`, `repositories/accounts.py`, or `services/summary.py`) following the existing patterns
 2. Add a new `--flag` to the `query` subparser in `cli.py`
 3. Handle the new flag in the `elif args.command == "query":` block
 4. Test the new command before responding to the user

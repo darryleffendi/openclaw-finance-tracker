@@ -15,11 +15,13 @@ CLI-first personal finance tracker for Darryl, powered by OpenClaw skills. Track
 
 ### 1. Initialize the database
 
+The DB auto-initializes on first import of `backend.db` (which happens on any `cli.py` run or service start). To create it eagerly:
+
 ```bash
-python3 database.py
+python3 -c "import backend.db"
 ```
 
-This auto-creates `finance.db` in the project root.
+This creates `finance.db` in the project root and seeds the `accounts` table.
 
 ### 2. Link skills to OpenClaw
 
@@ -42,6 +44,71 @@ sudo apt install python3-flask python3-flask-cors
 ```bash
 cd frontend
 npm install
+```
+
+### 4. Configure environment
+
+Create a `.env` file in the project root (gitignored). The backend reads it via `EnvironmentFile=` in the systemd unit, and `load_dotenv()` for local runs.
+
+```dotenv
+SECRET_KEY=             # any long random string; used to sign Flask session cookies
+GOOGLE_CLIENT_ID=       # from Google Cloud Console → OAuth 2.0 Client IDs
+GOOGLE_CLIENT_SECRET=   # paired with the client ID above
+REDIRECT_URI=           # e.g. https://your-domain/api/auth/callback (must match Google Console)
+ALLOWED_EMAILS=         # comma-separated allowlist, e.g. you@gmail.com
+```
+
+### 5. Install systemd services
+
+Two services run the stack: `finance-tracker.service` (Flask backend on port 8009) and `finance-frontend.service` (Vite build watcher).
+
+Adjust the install path in the unit files if yours isn't `/home/ubuntu/codespace/personal-finance-tracker`.
+
+**`/etc/systemd/system/finance-tracker.service`:**
+
+```ini
+[Unit]
+Description=Personal Finance Tracker Flask API
+After=network.target
+
+[Service]
+Type=simple
+User=ubuntu
+WorkingDirectory=/home/ubuntu/codespace/personal-finance-tracker
+ExecStart=/usr/bin/python3 -m backend.app
+Restart=on-failure
+RestartSec=5
+EnvironmentFile=/home/ubuntu/codespace/personal-finance-tracker/.env
+
+[Install]
+WantedBy=multi-user.target
+```
+
+**`/etc/systemd/system/finance-frontend.service`:**
+
+```ini
+[Unit]
+Description=Finance Tracker Frontend Build Watcher
+After=network.target
+
+[Service]
+Type=simple
+User=ubuntu
+WorkingDirectory=/home/ubuntu/codespace/personal-finance-tracker/frontend
+ExecStart=/usr/bin/npm run build -- --watch
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+```
+
+Then load and enable them:
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable --now finance-tracker.service finance-frontend.service
+sudo systemctl status finance-tracker.service
 ```
 
 ---
@@ -76,22 +143,30 @@ python3 cli.py delete --id <id>
 python3 cli.py categories
 ```
 
-### Dashboard (manual)
+### Dashboard (systemd)
 
-Start the Flask API:
-
-```bash
-python3 app.py
-```
-
-Start the frontend (in a separate terminal):
+The Flask backend and frontend build watcher run as systemd services.
 
 ```bash
-cd frontend
-npm run dev -- --port 5173
+# Start
+sudo systemctl start finance-tracker.service finance-frontend.service
+
+# Stop
+sudo systemctl stop finance-tracker.service finance-frontend.service
+
+# Restart (e.g. after a code change)
+sudo systemctl restart finance-tracker.service finance-frontend.service
+
+# Status
+sudo systemctl status finance-tracker.service
+sudo systemctl status finance-frontend.service
+
+# Logs (follow)
+sudo journalctl -u finance-tracker.service -f
+sudo journalctl -u finance-frontend.service -f
 ```
 
-Access via SSH port forwarding on ports `8000` (API) and `5173` (UI).
+The backend listens on port `8009`. Frontend build output is served behind your usual reverse proxy.
 
 ---
 

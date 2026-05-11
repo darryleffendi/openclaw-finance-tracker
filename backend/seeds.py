@@ -1,4 +1,4 @@
-# Seed data — used only by database.init_db() to populate the accounts table on first run.
+# Seed data — used only by db.init_db() to populate the accounts table on first run.
 # After seeding, the DB is the source of truth. Do not use this file at runtime.
 
 ACCOUNTS = [
