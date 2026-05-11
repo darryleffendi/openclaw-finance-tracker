@@ -74,13 +74,6 @@ python3 cli.py set-budget --account food --amount 2500000
 # Updates the monthly_budget for the food account
 ```
 
-## Wiping All Data (clean slate)
-
-```bash
-python3 cli.py wipe --confirm
-# Deletes all transactions and resets all account balances to 0
-```
-
 ## Extending with New Query Types
 
 If the user asks for a query type not yet supported (e.g., "show by date range", "top 5 accounts"):

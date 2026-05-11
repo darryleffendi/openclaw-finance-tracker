@@ -3,6 +3,35 @@ import json
 from backend.db import get_connection
 
 
+# ── Operations that take a caller-supplied connection ──────────────────────
+# Used by services that compose multiple writes into one transaction.
+
+def get_by_slug(conn, slug):
+    return conn.execute(
+        "SELECT * FROM accounts WHERE slug = ?", (slug,)
+    ).fetchone()
+
+
+def update_balance(conn, slug, delta):
+    conn.execute(
+        "UPDATE accounts SET balance = balance + ? WHERE slug = ?",
+        (delta, slug),
+    )
+
+
+def get_distribution_targets(conn):
+    return conn.execute(
+        """
+        SELECT slug, display_name, monthly_budget
+        FROM accounts
+        WHERE type IN ('expense', 'savings') AND monthly_budget > 0
+        ORDER BY sort_order ASC
+        """
+    ).fetchall()
+
+
+# ── Standalone operations (own their own connection) ───────────────────────
+
 def get_accounts():
     with get_connection() as conn:
         rows = conn.execute(

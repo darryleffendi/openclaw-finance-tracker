@@ -1,25 +1,21 @@
 from datetime import datetime
 
 from backend.db import get_connection
+from backend.repositories import accounts as accounts_repo
+from backend.repositories import transactions as transactions_repo
 
 
-def _distribute_salary(conn, salary_amount: float, date: str):
+def distribute_within(conn, salary_amount: float, date: str):
     """
-    Auto-distribute a salary deposit to all expense/savings accounts by
-    their monthly_budget amounts. Called within an open connection/transaction.
+    Distribute a deposit across all expense/savings accounts in proportion
+    to their monthly_budget. Operates on the caller's open connection — does
+    not commit. Returns the list of per-account allocations.
 
     If salary_amount >= total budget: each account gets exactly its monthly_budget.
     If salary_amount < total budget: each account gets a proportional share.
-    Any surplus stays in the salary account.
+    Any surplus stays in the source account (caller's responsibility).
     """
-    targets = conn.execute(
-        """
-        SELECT slug, display_name, monthly_budget
-        FROM accounts
-        WHERE type IN ('expense', 'savings') AND monthly_budget > 0
-        ORDER BY sort_order ASC
-        """
-    ).fetchall()
+    targets = accounts_repo.get_distribution_targets(conn)
 
     total_budget = sum(t["monthly_budget"] for t in targets)
     if total_budget == 0 or not targets:
@@ -40,14 +36,16 @@ def _distribute_salary(conn, salary_amount: float, date: str):
         if share <= 0:
             continue
 
-        conn.execute(
-            "INSERT INTO transactions (date, amount, type, category, note) VALUES (?, ?, 'income', ?, ?)",
-            (date, share, target["slug"], f"auto-distribution from salary"),
+        transactions_repo.insert(
+            conn,
+            amount=share,
+            type="income",
+            category=target["slug"],
+            subcategory=None,
+            note="auto-distribution from salary",
+            date=date,
         )
-        conn.execute(
-            "UPDATE accounts SET balance = balance + ? WHERE slug = ?",
-            (share, target["slug"]),
-        )
+        accounts_repo.update_balance(conn, target["slug"], share)
         distributed.append({"account": target["slug"], "amount": share})
 
     return distributed
@@ -57,6 +55,6 @@ def distribute_salary(amount: float, source_account: str = "salary") -> dict:
     """Manual distribution — for freelance or other income sources."""
     date = datetime.now().strftime("%Y-%m-%d")
     with get_connection() as conn:
-        distributed = _distribute_salary(conn, amount, date)
+        distributed = distribute_within(conn, amount, date)
         conn.commit()
     return {"source": source_account, "total": amount, "distributions": distributed}

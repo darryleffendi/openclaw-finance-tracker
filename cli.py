@@ -4,15 +4,13 @@ import json
 import sys
 from backend.repositories.accounts import get_accounts, update_account_budget
 from backend.repositories.transactions import (
-    delete_transaction,
     get_all_transactions,
     get_transactions_by_category,
     get_transactions_by_period,
-    insert_transaction,
-    wipe_all,
 )
 from backend.services.distribution import distribute_salary
 from backend.services.summary import get_summary
+from backend.services.transactions import delete_transaction, insert_transaction
 
 
 def main():
@@ -59,11 +57,6 @@ def main():
     distribute_parser.add_argument("--from", dest="source_account", default="freelance",
                                    help="Source account slug (default: freelance)")
 
-    # Wipe
-    wipe_parser = subparsers.add_parser("wipe", help="Delete all transactions and reset all account balances")
-    wipe_parser.add_argument("--confirm", action="store_true", required=True,
-                              help="Required flag to confirm data deletion")
-
     args = parser.parse_args()
 
     if args.command == "insert":
@@ -105,10 +98,6 @@ def main():
     elif args.command == "distribute":
         result = distribute_salary(args.amount, args.source_account)
         print(json.dumps(result, indent=2))
-
-    elif args.command == "wipe":
-        result = wipe_all(confirm=args.confirm)
-        print(json.dumps(result))
 
 
 if __name__ == "__main__":

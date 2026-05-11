@@ -1,46 +1,37 @@
-from datetime import datetime
-
 from backend.db import get_connection
-from backend.services.distribution import _distribute_salary
 
 
-def insert_transaction(
-    amount: float,
-    type: str,
-    category: str,
-    subcategory: str = None,
-    note: str = None,
-    date: str = None,
-):
-    if date is None:
-        date = datetime.now().strftime("%Y-%m-%d")
+# ── Operations that take a caller-supplied connection ──────────────────────
+# Used by services that compose multiple writes into one transaction.
 
-    with get_connection() as conn:
-        cursor = conn.execute(
-            "INSERT INTO transactions (date, amount, type, category, subcategory, note) VALUES (?, ?, ?, ?, ?, ?)",
-            (date, amount, type, category, subcategory, note),
-        )
-        txn_id = cursor.lastrowid
+def insert(conn, *, amount, type, category, subcategory, note, date):
+    cursor = conn.execute(
+        "INSERT INTO transactions (date, amount, type, category, subcategory, note) "
+        "VALUES (?, ?, ?, ?, ?, ?)",
+        (date, amount, type, category, subcategory, note),
+    )
+    return cursor.lastrowid
 
-        # Update the account balance
-        acct = conn.execute(
-            "SELECT type FROM accounts WHERE slug = ?", (category,)
-        ).fetchone()
 
-        distributed = []
-        if acct:
-            delta = amount if type == "income" else -amount
-            conn.execute(
-                "UPDATE accounts SET balance = balance + ? WHERE slug = ?",
-                (delta, category),
-            )
-            # Auto-distribute salary to expense/savings accounts
-            if category == "salary" and type == "income":
-                distributed = _distribute_salary(conn, amount, date)
+def delete(conn, txn_id):
+    conn.execute("DELETE FROM transactions WHERE id = ?", (txn_id,))
 
-        conn.commit()
-        return txn_id, distributed
 
+def get_by_id(conn, txn_id):
+    return conn.execute(
+        "SELECT * FROM transactions WHERE id = ?", (txn_id,)
+    ).fetchone()
+
+
+def find_salary_distributions(conn, date):
+    return conn.execute(
+        "SELECT id, amount, category FROM transactions "
+        "WHERE note = 'auto-distribution from salary' AND date = ?",
+        (date,),
+    ).fetchall()
+
+
+# ── Standalone read operations (own their own connection) ──────────────────
 
 def get_transactions_by_period(period: str):
     queries = {
@@ -69,49 +60,3 @@ def get_transactions_by_category(category: str):
 
 def get_all_transactions():
     return get_transactions_by_period("all")
-
-
-def delete_transaction(transaction_id: int):
-    with get_connection() as conn:
-        row = conn.execute(
-            "SELECT amount, type, category, note FROM transactions WHERE id = ?",
-            (transaction_id,),
-        ).fetchone()
-        if row is None:
-            return False
-
-        # Cascade-delete auto-distribution rows if deleting a salary transaction
-        if row["category"] == "salary" and row["type"] == "income":
-            dist_rows = conn.execute(
-                "SELECT id, amount, category FROM transactions WHERE note = 'auto-distribution from salary' AND date = (SELECT date FROM transactions WHERE id = ?)",
-                (transaction_id,),
-            ).fetchall()
-            for dr in dist_rows:
-                conn.execute("DELETE FROM transactions WHERE id = ?", (dr["id"],))
-                conn.execute(
-                    "UPDATE accounts SET balance = balance - ? WHERE slug = ?",
-                    (dr["amount"], dr["category"]),
-                )
-
-        # Reverse the account balance for the main transaction
-        # Skip reversal for auto-distribution rows (handled above or deleted separately)
-        if row["note"] != "auto-distribution from salary":
-            delta = row["amount"] if row["type"] == "income" else -row["amount"]
-            conn.execute(
-                "UPDATE accounts SET balance = balance - ? WHERE slug = ?",
-                (delta, row["category"]),
-            )
-
-        conn.execute("DELETE FROM transactions WHERE id = ?", (transaction_id,))
-        conn.commit()
-        return True
-
-
-def wipe_all(confirm: bool = False):
-    if not confirm:
-        return {"wiped": False, "reason": "Pass confirm=True to wipe"}
-    with get_connection() as conn:
-        conn.execute("DELETE FROM transactions")
-        conn.execute("UPDATE accounts SET balance = 0")
-        conn.commit()
-    return {"wiped": True}
