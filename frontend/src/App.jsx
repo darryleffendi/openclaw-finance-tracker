@@ -3,6 +3,8 @@ import { useDashboardData, bucketsBySlug, spentForAccount } from "./lib/dashboar
 import MobileDashboard from "./components/mobile/MobileDashboard"
 import CategoryDetail from "./components/screens/CategoryDetail"
 import Settings from "./components/screens/Settings"
+import Login from "./components/screens/Login"
+import { UnauthorizedError } from "./api"
 import AddTransactionSheet from "./components/sheets/AddTransactionSheet"
 import EditTransactionSheet from "./components/sheets/EditTransactionSheet"
 import PeriodPicker from "./components/sheets/PeriodPicker"
@@ -20,8 +22,11 @@ export default function App() {
   const [screen, setScreen] = useState({ name: "home" })
   const [sheet, setSheet] = useState(null) // {kind:'add'} | {kind:'edit', tx} | null
   const data = useDashboardData(period)
-
   const bucketMap = useMemo(() => bucketsBySlug(data.buckets), [data.buckets])
+
+  if (data.error instanceof UnauthorizedError) {
+    return <Login />
+  }
 
   const ymd = data.today?.date || ""
   const day = Number(ymd.split("-")[2]) || 1

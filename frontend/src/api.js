@@ -3,11 +3,17 @@
 
 const BASE = "/api"
 
+export class UnauthorizedError extends Error {
+  constructor() {
+    super("Unauthorized")
+    this.name = "UnauthorizedError"
+  }
+}
+
 export async function apiFetch(url, options = {}) {
   const res = await fetch(url, { credentials: "include", ...options })
   if (res.status === 401) {
-    window.location.href = `${BASE}/auth/login`
-    return new Promise(() => {})
+    throw new UnauthorizedError()
   }
   return res
 }
