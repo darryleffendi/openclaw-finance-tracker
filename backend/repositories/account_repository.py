@@ -2,6 +2,8 @@ import json
 
 from backend.db import get_connection
 
+ALLOWED_UPDATE_FIELDS = {"monthly_budget", "per_day_budget", "subcategories", "display_name"}
+
 
 # ── Operations that take a caller-supplied connection ──────────────────────
 # Used by services that compose multiple writes into one transaction.
@@ -38,11 +40,50 @@ def get_accounts():
         return result
 
 
-def update_account_budget(slug: str, monthly_budget: float) -> bool:
+def get_account(slug: str):
+    with get_connection() as conn:
+        row = conn.execute("SELECT * FROM accounts WHERE slug = ?", (slug,)).fetchone()
+        if row is None:
+            return None
+        d = dict(row)
+        d["subcategories"] = json.loads(d["subcategories"])
+        return d
+
+
+def update_account(slug: str, **fields) -> bool:
+    """
+    Partial update. Accepts any subset of: monthly_budget, per_day_budget,
+    subcategories (list[str]), display_name. Unknown keys raise ValueError.
+    Returns True if a row was updated, False if slug not found.
+    """
+    unknown = set(fields) - ALLOWED_UPDATE_FIELDS
+    if unknown:
+        raise ValueError(f"Unknown account fields: {sorted(unknown)}")
+    if not fields:
+        raise ValueError("No fields supplied")
+
+    set_clauses = []
+    params = []
+    for key, val in fields.items():
+        if key == "subcategories":
+            if not isinstance(val, list):
+                raise ValueError("subcategories must be a list")
+            set_clauses.append("subcategories = ?")
+            params.append(json.dumps(val))
+        else:
+            set_clauses.append(f"{key} = ?")
+            params.append(val)
+    params.append(slug)
+
     with get_connection() as conn:
         cursor = conn.execute(
-            "UPDATE accounts SET monthly_budget = ? WHERE slug = ?",
-            (monthly_budget, slug),
+            f"UPDATE accounts SET {', '.join(set_clauses)} WHERE slug = ?",
+            params,
         )
         conn.commit()
         return cursor.rowcount > 0
+
+
+def update_account_budget(slug: str, monthly_budget: float) -> bool:
+    """Back-compat shim — prefer update_account."""
+    return update_account(slug, monthly_budget=monthly_budget)

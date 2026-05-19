@@ -2,7 +2,7 @@
 import argparse
 import json
 import sys
-from backend.repositories.account_repository import get_accounts, update_account_budget
+from backend.repositories.account_repository import get_account, get_accounts, update_account, update_account_budget
 from backend.repositories.transaction_repository import (
     get_all_transactions,
     get_transactions_by_category,
@@ -46,10 +46,20 @@ def main():
     # Categories (legacy alias for accounts)
     subparsers.add_parser("categories", help="[deprecated] Use 'accounts' instead")
 
-    # Set budget
-    set_budget_parser = subparsers.add_parser("set-budget", help="Update monthly budget for an account")
+    # Set budget (legacy — kept for back-compat; prefer set-account)
+    set_budget_parser = subparsers.add_parser("set-budget", help="[deprecated] Update monthly budget; prefer 'set-account'")
     set_budget_parser.add_argument("--account", required=True, help="Account slug")
     set_budget_parser.add_argument("--amount", type=float, required=True, help="New monthly budget in IDR")
+
+    # Set account (any subset of fields)
+    set_account_parser = subparsers.add_parser("set-account", help="Update any account fields (partial)")
+    set_account_parser.add_argument("--slug", required=True, help="Account slug")
+    set_account_parser.add_argument("--monthly-budget", type=float, default=None, help="New monthly budget in IDR")
+    set_account_parser.add_argument("--per-day-budget", type=int, choices=[0, 1], default=None,
+                                    help="Whether this account contributes to today's allowance (0 or 1)")
+    set_account_parser.add_argument("--subcategories", default=None,
+                                    help="Comma-separated subcategory list, e.g. 'dine,gofood,snack' (use empty string to clear)")
+    set_account_parser.add_argument("--display-name", default=None, help="Display name")
 
     # Distribute
     distribute_parser = subparsers.add_parser("distribute", help="Manually distribute funds to expense accounts")
@@ -94,6 +104,29 @@ def main():
     elif args.command == "set-budget":
         success = update_account_budget(args.account, args.amount)
         print(json.dumps({"success": success, "account": args.account, "monthly_budget": args.amount}))
+
+    elif args.command == "set-account":
+        fields = {}
+        if args.monthly_budget is not None:
+            fields["monthly_budget"] = args.monthly_budget
+        if args.per_day_budget is not None:
+            fields["per_day_budget"] = args.per_day_budget
+        if args.subcategories is not None:
+            fields["subcategories"] = [s.strip() for s in args.subcategories.split(",") if s.strip()]
+        if args.display_name is not None:
+            fields["display_name"] = args.display_name
+        if not fields:
+            print(json.dumps({"success": False, "error": "Supply at least one of --monthly-budget, --per-day-budget, --subcategories, --display-name"}))
+            sys.exit(1)
+        try:
+            ok = update_account(args.slug, **fields)
+        except ValueError as e:
+            print(json.dumps({"success": False, "error": str(e)}))
+            sys.exit(1)
+        if not ok:
+            print(json.dumps({"success": False, "error": "Account not found"}))
+            sys.exit(1)
+        print(json.dumps({"success": True, "account": get_account(args.slug)}, indent=2))
 
     elif args.command == "distribute":
         result = distribute_salary(args.amount, args.source_account)
