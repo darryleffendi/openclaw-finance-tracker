@@ -249,33 +249,39 @@ CREATE INDEX IF NOT EXISTS idx_txn_category_date ON transactions(category, date)
 |---|---|---|
 | GET | `/api/buckets?month=YYYY-MM` | `{ month, buckets: [{slug, year_month, income, expense, auto_dist_in, auto_dist_out}] }` |
 
-### New endpoints (PRD v2)
+### New endpoints (PRD v2) — all shipped ✓
 
-| Method | Path | Description |
-|---|---|---|
-| GET | `/api/today` | `{ total_allowance, days_remaining, breakdown: [{category, allowance}], over_today }` |
-| PATCH | `/api/transactions/:id` | Edit amount/note. For salary: re-runs distribution. |
-| GET | `/api/recurring` | List rules |
-| POST | `/api/recurring` | Create rule |
-| PATCH | `/api/recurring/:id` | Update rule |
-| DELETE | `/api/recurring/:id` | Delete rule |
-| POST | `/api/recurring/run` | Manual materialization (idempotent) |
-| PATCH | `/api/accounts/:slug` | Edit `monthly_budget`, `per_day_budget`, `subcategories` |
+| Method | Path | Status | Description |
+|---|---|---|---|
+| GET | `/api/today` | ✓ shipped | `{ total_allowance, days_remaining, breakdown, over_budget }` |
+| PATCH | `/api/transactions/:id` | ✓ shipped | Edit amount/note. Salary: re-runs distribution (id changes). Auto-dist rows: 400. |
+| GET | `/api/recurring` | ✓ shipped | List rules |
+| POST | `/api/recurring` | ✓ shipped | Create rule |
+| PATCH | `/api/recurring/:id` | ✓ shipped | Update rule |
+| DELETE | `/api/recurring/:id` | ✓ shipped | Delete rule |
+| POST | `/api/recurring/run` | ✓ shipped | Force-materialize all enabled rules for current month |
+| PATCH | `/api/accounts/:slug` | ✓ shipped | Edit `monthly_budget`, `per_day_budget`, `subcategories`, `display_name` |
 
-### Behavior changes
+### Behavior changes — shipped ✓
 
-- Any GET against `/api/transactions`, `/api/summary`, `/api/today`, or `/api/accounts` first runs recurring-rule materialization for the current month if not yet run.
+- Any GET against `/api/transactions`, `/api/summary`, `/api/today`, or `/api/accounts` first runs `recurring_service.materialize_if_needed()` for the current month.
 
 ---
 
 ## 8. Acceptance Criteria
 
-- [ ] Daily allowance updates within one render after adding/deleting/editing today's transaction.
-- [ ] Categories with `per_day_budget = false` do **not** appear in today's allowance.
+**Backend (verified)**
+- [x] Daily allowance updates immediately after adding/deleting a transaction (`per_day_budget=1` accounts only).
+- [x] Categories with `per_day_budget = false` do **not** appear in today's allowance.
+- [x] First API read of a new month auto-creates recurring transactions with their configured `date` (day clamped to last day of month).
+- [x] Salary recurring rule triggers full auto-distribution cascade.
+- [x] Editing a salary transaction's amount re-distributes proportionally; deleting reverses cleanly.
+- [x] PATCH `/api/accounts/:slug` updates budget/per_day_budget/subcategories.
+- [x] PATCH `/api/transactions/:id` rejects auto-distribution rows with 400.
+- [x] All bucket invariants hold after every write operation.
+
+**Frontend (pending — owned separately)**
 - [ ] Negative remaining renders red, no NaN, no UI break.
-- [ ] First dashboard load on day 1 of a new month auto-creates recurring transactions with their configured `date`.
-- [ ] Salary recurring rule: created transaction triggers full distribution cascade.
-- [ ] Editing a salary transaction's amount re-distributes proportionally; deleting reverses cleanly.
 - [ ] Mobile (<768px) layout: hero allowance card + at least 2 account cards visible above the fold; charts collapsed.
 - [ ] Settings page allows editing all budgets, per_day_budget flags, subcategories, and recurring rules without touching the DB.
 - [ ] Period selector supports day/week/month with calendar picker, defaulting to current month.

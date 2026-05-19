@@ -1,6 +1,6 @@
 ---
 name: personal-finance-transaction-management
-description: Manage individual finance transactions one at a time. Use this skill when the user wants to record a single income or expense, query transactions, get summaries, manage account balances/budgets, distribute salary, or when a new query type is needed that the CLI doesn't yet support. For bulk imports from Excel or image files, use the finance-bulk-import skill instead.
+description: Manage individual finance transactions one at a time. Use this skill when the user wants to record a single income or expense, query transactions, get summaries, manage account balances/budgets, distribute salary, manage recurring rules, check today's allowance, or when a new query type is needed that the CLI doesn't yet support. For bulk imports from Excel or image files, use the finance-bulk-import skill instead.
 ---
 
 # Personal Finance Transaction Management
@@ -20,11 +20,21 @@ python3 cli.py insert --amount <amount> --type <income|expense> --category "<slu
 Examples:
 ```bash
 python3 cli.py insert --amount 50000 --type expense --category food --subcategory gofood --note "lunch"
-python3 cli.py insert --amount 10000000 --type income --category salary --note "april salary"
-# ↑ Salary auto-distributes to all expense/savings accounts by their monthly_budget
-python3 cli.py insert --amount 120000 --type expense --category transport --subcategory flazz --date 2025-02-15
+python3 cli.py insert --amount 10000000 --type income --category salary --note "may salary"
+# ↑ Salary auto-distributes proportionally to all expense/savings accounts
+python3 cli.py insert --amount 120000 --type expense --category transport --subcategory flazz --date 2026-05-15
 python3 cli.py insert --amount 35000 --type expense --category groceries --note "alfamart"
 python3 cli.py insert --amount 2000000 --type income --category freelance --note "project payment"
+```
+
+## Editing a Transaction (amount and/or note only)
+
+```bash
+python3 cli.py edit --id <id> --amount <new_amount>
+python3 cli.py edit --id <id> --note "<new_note>"
+python3 cli.py edit --id <id> --amount <new_amount> --note "<new_note>"
+# Salary income: editing the amount re-runs the full distribution cascade (row id changes)
+# Auto-distribution rows cannot be edited directly — edit the parent salary row
 ```
 
 ## Querying Transactions
@@ -42,15 +52,33 @@ python3 cli.py query --period all
 # By account
 python3 cli.py query --category food
 
-# Summary only (includes per-account balances)
+# Summary only
 python3 cli.py query --period this-month --summary
+```
+
+## Today's Allowance
+
+```bash
+python3 cli.py today
+# Returns total daily allowance + per-category breakdown for accounts with per_day_budget=1
+# Formula per account: (monthly_budget - spent_this_month) / days_remaining_in_month
 ```
 
 ## Listing Accounts
 
 ```bash
 python3 cli.py accounts
-# Returns all accounts with slug, display_name, type, balance, monthly_budget
+# Returns all accounts with slug, display_name, type, monthly_budget, per_day_budget, subcategories
+```
+
+## Updating an Account
+
+```bash
+python3 cli.py set-account --slug food --monthly-budget 2500000
+python3 cli.py set-account --slug food --per-day-budget 1
+python3 cli.py set-account --slug food --subcategories "dine,gofood,grabfood,snack"
+python3 cli.py set-account --slug food --monthly-budget 2500000 --per-day-budget 1 --subcategories "dine,gofood"
+# Accepts any subset of the above flags; updates only what is provided
 ```
 
 ## Deleting a Transaction
@@ -60,18 +88,36 @@ python3 cli.py delete --id <id>
 # If the deleted transaction is a salary income, its auto-distribution rows are also deleted
 ```
 
+## Recurring Transaction Rules
+
+```bash
+# List all rules
+python3 cli.py recurring list
+
+# Create a rule (fires on day N of each month)
+python3 cli.py recurring add --name "Rent" --amount 2200000 --type expense --category fixed --day-of-month 25 --note "monthly rent"
+python3 cli.py recurring add --name "Salary" --amount 19875000 --type income --category salary --day-of-month 1 --note "monthly salary"
+
+# Update a rule
+python3 cli.py recurring update --id <id> --amount 2400000
+python3 cli.py recurring update --id <id> --enabled 0  # disable
+python3 cli.py recurring update --id <id> --enabled 1  # re-enable
+
+# Delete a rule
+python3 cli.py recurring delete --id <id>
+
+# Force-materialize all enabled rules for the current month (idempotent)
+python3 cli.py recurring run
+```
+
+Rules auto-materialize lazily on the first API read of each month (transactions, summary, accounts, today).
+Salary recurring rules trigger the full auto-distribution cascade.
+Day-of-month is clamped to the last day of the month (e.g. day 31 in February → day 28).
+
 ## Distributing Salary / Freelance Income Manually
 
 ```bash
-# Distribute a lump sum to all expense/savings accounts by their monthly_budget proportions
 python3 cli.py distribute --amount 2000000 --from freelance
-```
-
-## Setting a Budget
-
-```bash
-python3 cli.py set-budget --account food --amount 2500000
-# Updates the monthly_budget for the food account
 ```
 
 ## Extending with New Query Types
@@ -87,7 +133,7 @@ Always confirm with the user before writing to files.
 
 ## Response Format
 
-Parse the JSON output and present it in a readable format. For summaries, show income, expense, balance, and account balances. For lists, group by date or account as appropriate. Use IDR (Rp) for currency.
+Parse the JSON output and present it in a readable format. For summaries, show income, expense, balance, and account info. For lists, group by date or account as appropriate. Use IDR (Rp) for currency.
 
 ## Account Reference
 
@@ -101,7 +147,8 @@ Parse the JSON output and present it in a readable format. For summaries, show i
 | transport | Transport | expense |
 | wellness | Wellness & Personal | expense |
 | entertainment | Social & Entertainment | expense |
-| savings | Savings / Investment | savings |
+| savings | Savings | savings |
+| investments | Investments | savings |
 
 ### Subcategories
 - **fixed**: rent, electricity, internet, phone, water, gym, subscriptions
