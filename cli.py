@@ -19,7 +19,7 @@ from backend.services.recurring_service import (
     update_rule,
 )
 from backend.services.summary_service import get_summary
-from backend.services.transaction_service import delete_transaction, insert_transaction
+from backend.services.transaction_service import delete_transaction, insert_transaction, update_transaction
 
 
 def main():
@@ -48,6 +48,12 @@ def main():
     # Delete
     delete_parser = subparsers.add_parser("delete", help="Delete a transaction by ID")
     delete_parser.add_argument("--id", type=int, required=True)
+
+    # Edit (amount and/or note only; type/category are immutable)
+    edit_parser = subparsers.add_parser("edit", help="Edit a transaction's amount and/or note")
+    edit_parser.add_argument("--id", type=int, required=True, help="Transaction id")
+    edit_parser.add_argument("--amount", type=float, default=None, help="New amount in IDR")
+    edit_parser.add_argument("--note", default=None, help="New note")
 
     # Accounts
     subparsers.add_parser("accounts", help="List all accounts with balances")
@@ -136,6 +142,20 @@ def main():
     elif args.command == "delete":
         success = delete_transaction(args.id)
         print(json.dumps({"success": success, "id": args.id}))
+
+    elif args.command == "edit":
+        if args.amount is None and args.note is None:
+            print(json.dumps({"success": False, "error": "Supply --amount and/or --note"}))
+            sys.exit(1)
+        try:
+            result = update_transaction(args.id, amount=args.amount, note=args.note)
+        except ValueError as e:
+            print(json.dumps({"success": False, "error": str(e)}))
+            sys.exit(1)
+        if result is None:
+            print(json.dumps({"success": False, "error": "Transaction not found"}))
+            sys.exit(1)
+        print(json.dumps({"success": True, **result}))
 
     elif args.command in ("accounts", "categories"):
         if args.command == "categories":

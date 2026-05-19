@@ -23,6 +23,10 @@ def get_by_id(conn, txn_id):
     ).fetchone()
 
 
+def update_note(conn, txn_id, note):
+    conn.execute("UPDATE transactions SET note = ? WHERE id = ?", (note, txn_id))
+
+
 def find_salary_distributions(conn, date):
     return conn.execute(
         "SELECT id, amount, type, category FROM transactions "

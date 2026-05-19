@@ -6,7 +6,7 @@ from backend.repositories.transaction_repository import (
     get_transactions_by_period,
 )
 from backend.services.recurring_service import materialize_if_needed
-from backend.services.transaction_service import delete_transaction, insert_transaction
+from backend.services.transaction_service import delete_transaction, insert_transaction, update_transaction
 
 bp = Blueprint("transactions", __name__, url_prefix="/api/transactions")
 
@@ -38,6 +38,23 @@ def create_transaction():
     if distributed:
         result["distributions"] = distributed
     return jsonify(result), 201
+
+
+@bp.patch("/<int:transaction_id>")
+@login_required
+def edit_transaction(transaction_id):
+    data = request.json or {}
+    amount = data.get("amount")
+    note = data.get("note")
+    if amount is None and note is None:
+        return jsonify({"error": "Supply at least one of: amount, note"}), 400
+    try:
+        result = update_transaction(transaction_id, amount=amount, note=note)
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 400
+    if result is None:
+        return jsonify({"error": "Transaction not found"}), 404
+    return jsonify(result)
 
 
 @bp.delete("/<int:transaction_id>")
