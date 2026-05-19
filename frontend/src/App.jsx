@@ -2,6 +2,7 @@ import { useMemo, useState } from "react"
 import { useDashboardData, bucketsBySlug, spentForAccount } from "./lib/dashboardData"
 import MobileDashboard from "./components/mobile/MobileDashboard"
 import CategoryDetail from "./components/screens/CategoryDetail"
+import Settings from "./components/screens/Settings"
 import AddTransactionSheet from "./components/sheets/AddTransactionSheet"
 import EditTransactionSheet from "./components/sheets/EditTransactionSheet"
 import PeriodPicker from "./components/sheets/PeriodPicker"
@@ -29,7 +30,15 @@ export default function App() {
   const onTxTap = (tx) => setSheet({ kind: "edit", tx })
 
   let content
-  if (screen.name === "category" && data.accounts) {
+  if (screen.name === "settings") {
+    content = (
+      <Settings
+        accounts={data.accounts}
+        onAccountChange={() => data.refresh()}
+        onBack={() => setScreen({ name: "home" })}
+      />
+    )
+  } else if (screen.name === "category" && data.accounts) {
     const account = data.accounts.find((a) => a.slug === screen.slug)
     if (account) {
       content = (
@@ -51,7 +60,7 @@ export default function App() {
         data={data}
         periodLabel={PERIODS[period]}
         onPeriodTap={() => setSheet({ kind: "period" })}
-        onSettings={() => {}}
+        onSettings={() => setScreen({ name: "settings" })}
         onAdd={() => setSheet({ kind: "add" })}
         onAccountTap={(slug) => setScreen({ name: "category", slug })}
         onTxTap={onTxTap}
