@@ -1,13 +1,15 @@
 import { useMemo, useState } from "react"
 import { useDashboardData, bucketsBySlug, spentForAccount } from "./lib/dashboardData"
+import { useIsDesktop } from "./lib/useViewport"
 import MobileDashboard from "./components/mobile/MobileDashboard"
+import DesktopDashboard from "./components/desktop/DesktopDashboard"
 import CategoryDetail from "./components/screens/CategoryDetail"
 import Settings from "./components/screens/Settings"
 import Login from "./components/screens/Login"
-import { UnauthorizedError } from "./api"
 import AddTransactionSheet from "./components/sheets/AddTransactionSheet"
 import EditTransactionSheet from "./components/sheets/EditTransactionSheet"
 import PeriodPicker from "./components/sheets/PeriodPicker"
+import { UnauthorizedError } from "./api"
 
 const PERIODS = {
   today: "Today",
@@ -20,8 +22,9 @@ const PERIODS = {
 export default function App() {
   const [period, setPeriod] = useState("this-month")
   const [screen, setScreen] = useState({ name: "home" })
-  const [sheet, setSheet] = useState(null) // {kind:'add'} | {kind:'edit', tx} | null
+  const [sheet, setSheet] = useState(null)
   const data = useDashboardData(period)
+  const isDesktop = useIsDesktop()
   const bucketMap = useMemo(() => bucketsBySlug(data.buckets), [data.buckets])
 
   if (data.error instanceof UnauthorizedError) {
@@ -60,8 +63,9 @@ export default function App() {
   }
 
   if (!content) {
+    const Dashboard = isDesktop ? DesktopDashboard : MobileDashboard
     content = (
-      <MobileDashboard
+      <Dashboard
         data={data}
         periodLabel={PERIODS[period]}
         onPeriodTap={() => setSheet({ kind: "period" })}
