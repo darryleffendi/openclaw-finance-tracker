@@ -4,6 +4,7 @@ import MobileDashboard from "./components/mobile/MobileDashboard"
 import CategoryDetail from "./components/screens/CategoryDetail"
 import AddTransactionSheet from "./components/sheets/AddTransactionSheet"
 import EditTransactionSheet from "./components/sheets/EditTransactionSheet"
+import PeriodPicker from "./components/sheets/PeriodPicker"
 
 const PERIODS = {
   today: "Today",
@@ -14,7 +15,7 @@ const PERIODS = {
 }
 
 export default function App() {
-  const [period] = useState("this-month")
+  const [period, setPeriod] = useState("this-month")
   const [screen, setScreen] = useState({ name: "home" })
   const [sheet, setSheet] = useState(null) // {kind:'add'} | {kind:'edit', tx} | null
   const data = useDashboardData(period)
@@ -49,7 +50,7 @@ export default function App() {
       <MobileDashboard
         data={data}
         periodLabel={PERIODS[period]}
-        onPeriodTap={() => {}}
+        onPeriodTap={() => setSheet({ kind: "period" })}
         onSettings={() => {}}
         onAdd={() => setSheet({ kind: "add" })}
         onAccountTap={(slug) => setScreen({ name: "category", slug })}
@@ -74,6 +75,13 @@ export default function App() {
           accounts={data.accounts}
           onClose={() => setSheet(null)}
           onSaved={() => data.refresh()}
+        />
+      )}
+      {sheet?.kind === "period" && (
+        <PeriodPicker
+          period={period}
+          onPick={setPeriod}
+          onClose={() => setSheet(null)}
         />
       )}
     </>
