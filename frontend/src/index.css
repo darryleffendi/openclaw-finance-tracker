@@ -1,3 +1,36 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+:root {
+  --accent: #fb923c;
+  --accent-soft: #fb923c1f;
+  --accent-glow: #fb923c40;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+body {
+  font-family: "Geist", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: #0a0d12;
+  color: #e7eaf0;
+}
+
+[data-num] {
+  font-variant-numeric: tabular-nums;
+}
+
+.ab-scroll::-webkit-scrollbar {
+  display: none;
+}
+.ab-scroll {
+  scrollbar-width: none;
+}
