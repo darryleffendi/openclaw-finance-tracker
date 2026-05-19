@@ -7,6 +7,7 @@ from backend.config import CORS_ORIGINS, PORT, SECRET_KEY
 from backend.routes import (
     account_route,
     auth_route,
+    bucket_route,
     distribute_route,
     summary_route,
     transaction_route,
@@ -22,6 +23,7 @@ init_oauth(app)
 app.register_blueprint(auth_route.bp)
 app.register_blueprint(transaction_route.bp)
 app.register_blueprint(account_route.bp)
+app.register_blueprint(bucket_route.bp)
 app.register_blueprint(summary_route.bp)
 app.register_blueprint(distribute_route.bp)
 

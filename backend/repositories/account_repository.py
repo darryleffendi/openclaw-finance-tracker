@@ -12,13 +12,6 @@ def get_by_slug(conn, slug):
     ).fetchone()
 
 
-def update_balance(conn, slug, delta):
-    conn.execute(
-        "UPDATE accounts SET balance = balance + ? WHERE slug = ?",
-        (delta, slug),
-    )
-
-
 def get_distribution_targets(conn):
     return conn.execute(
         """

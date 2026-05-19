@@ -140,15 +140,23 @@ Transaction *entry* is mostly via Telegram + OpenClaw; the dashboard is **read-m
   - **Recurring** — list with create / edit / delete / enable-toggle / run-now.
 - Logout button at the bottom.
 
-### 5.10 Balance Semantics *(FIX: negative balance bug)*
+### 5.10 Balance Semantics
 
-| Account type | Card "Remaining" | "Spent / Saved" | Reset |
+All monthly balance figures are sourced from the `account_buckets` table (one row per `(slug, year_month)`, with four columns: `income`, `expense`, `auto_dist_in`, `auto_dist_out`). The legacy `accounts.balance` column has been removed. Frontend reads month data via `GET /api/buckets?month=YYYY-MM`.
+
+Per account type:
+
+| Account type | Card "Remaining" | "Spent / Saved" | Source columns |
 |---|---|---|---|
-| Expense | `monthly_budget − spent_this_month` (can be negative, render red) | spent this month | Monthly |
-| Income (salary, freelance) | `received_this_month` vs `monthly_budget` | received this month | Monthly |
-| Savings / Investments | this month's net deposit (`SUM(amount) where date in current month`) vs `monthly_budget` | **also show all-time total** | Monthly (for the budget portion); all-time number is cumulative |
+| Expense | `monthly_budget − bucket.expense` (can be negative; render red) | `bucket.expense` | `expense` |
+| Income (salary, freelance) | `bucket.income` (received this month) vs `monthly_budget` | `bucket.income` | `income` |
+| Savings / Investments | `bucket.income + bucket.auto_dist_in` for the month vs `monthly_budget`; **also show all-time total** | sum of `income + auto_dist_in` for the month | `income`, `auto_dist_in` |
 
-Negative remaining renders as `−Rp X` in red with the over-budget warning state.
+All-time savings totals are computed via `SUM(income + auto_dist_in)` across all months for the account.
+
+Negative "Remaining" on expense accounts renders as `−Rp X` in red with the over-budget warning state.
+
+Auto-distribution semantics: when salary income is recorded, `distribute_within` inserts target income rows (incrementing each target's `auto_dist_in`) and one matching source mirror expense row on salary (incrementing `auto_dist_out`). The "real" income and expense columns exclude auto-distribution movement so the summary income/expense totals reflect actual external money flow, not internal transfers.
 
 ### 5.11 Login Screen
 
@@ -207,7 +215,24 @@ CREATE TABLE recurring_transactions (
 );
 ```
 
-### 6.3 Indexes (perf)
+### 6.3 `account_buckets` table *(already shipped as buckets refactor prerequisite)*
+
+```sql
+CREATE TABLE account_buckets (
+    slug          TEXT NOT NULL,
+    year_month    TEXT NOT NULL,                 -- 'YYYY-MM'
+    income        REAL NOT NULL DEFAULT 0,       -- real income only
+    expense       REAL NOT NULL DEFAULT 0,       -- real expense only
+    auto_dist_in  REAL NOT NULL DEFAULT 0,       -- auto-distribution received
+    auto_dist_out REAL NOT NULL DEFAULT 0,       -- auto-distribution source mirror
+    PRIMARY KEY (slug, year_month),
+    FOREIGN KEY (slug) REFERENCES accounts(slug)
+);
+```
+
+Rows are created lazily on first transaction for a given `(slug, year_month)` via UPSERT in `account_bucket_repository.apply_delta`. The legacy `accounts.balance` column has been dropped.
+
+### 6.4 Indexes (perf)
 
 ```sql
 CREATE INDEX IF NOT EXISTS idx_txn_date ON transactions(date);
@@ -218,7 +243,13 @@ CREATE INDEX IF NOT EXISTS idx_txn_category_date ON transactions(category, date)
 
 ## 7. API Changes
 
-### New endpoints
+### Already-shipped endpoints (buckets refactor)
+
+| Method | Path | Description |
+|---|---|---|
+| GET | `/api/buckets?month=YYYY-MM` | `{ month, buckets: [{slug, year_month, income, expense, auto_dist_in, auto_dist_out}] }` |
+
+### New endpoints (PRD v2)
 
 | Method | Path | Description |
 |---|---|---|

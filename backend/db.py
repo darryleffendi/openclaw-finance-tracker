@@ -33,10 +33,21 @@ def init_db():
                 display_name   TEXT    NOT NULL,
                 type           TEXT    NOT NULL CHECK(type IN ('income', 'expense', 'holding', 'savings')),
                 monthly_budget REAL    NOT NULL DEFAULT 0,
-                balance        REAL    NOT NULL DEFAULT 0,
                 subcategories  TEXT    NOT NULL DEFAULT '[]',
                 sort_order     INTEGER NOT NULL DEFAULT 0,
                 created_at     TEXT    DEFAULT (datetime('now'))
+            )
+        """)
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS account_buckets (
+                slug          TEXT NOT NULL,
+                year_month    TEXT NOT NULL,
+                income        REAL NOT NULL DEFAULT 0,
+                expense       REAL NOT NULL DEFAULT 0,
+                auto_dist_in  REAL NOT NULL DEFAULT 0,
+                auto_dist_out REAL NOT NULL DEFAULT 0,
+                PRIMARY KEY (slug, year_month),
+                FOREIGN KEY (slug) REFERENCES accounts(slug)
             )
         """)
         for acct in ACCOUNTS:

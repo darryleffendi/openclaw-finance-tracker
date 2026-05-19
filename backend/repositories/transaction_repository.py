@@ -25,7 +25,7 @@ def get_by_id(conn, txn_id):
 
 def find_salary_distributions(conn, date):
     return conn.execute(
-        "SELECT id, amount, category FROM transactions "
+        "SELECT id, amount, type, category FROM transactions "
         "WHERE note = 'auto-distribution from salary' AND date = ?",
         (date,),
     ).fetchall()
