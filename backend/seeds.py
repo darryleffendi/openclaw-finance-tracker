@@ -1,5 +1,9 @@
 # Seed data — used only by db.init_db() to populate the accounts table on first run.
 # After seeding, the DB is the source of truth. Do not use this file at runtime.
+#
+# `per_day_budget` flag controls whether this account contributes to the
+# "today's allowance" computation (typically true for daily-spend categories
+# like food/groceries/transport; false for fixed bills, savings, and income).
 
 ACCOUNTS = [
     {
@@ -7,6 +11,7 @@ ACCOUNTS = [
         "display_name": "Salary",
         "type": "income",
         "monthly_budget": 0,
+        "per_day_budget": 0,
         "subcategories": [],
         "sort_order": 1,
     },
@@ -15,6 +20,7 @@ ACCOUNTS = [
         "display_name": "Freelance",
         "type": "holding",
         "monthly_budget": 0,
+        "per_day_budget": 0,
         "subcategories": [],
         "sort_order": 2,
     },
@@ -23,6 +29,7 @@ ACCOUNTS = [
         "display_name": "Fixed Obligations",
         "type": "expense",
         "monthly_budget": 3_460_000,
+        "per_day_budget": 0,
         "subcategories": ["rent", "electricity", "internet", "phone", "water", "gym", "subscriptions"],
         "sort_order": 3,
     },
@@ -31,6 +38,7 @@ ACCOUNTS = [
         "display_name": "Food",
         "type": "expense",
         "monthly_budget": 2_100_000,
+        "per_day_budget": 1,
         "subcategories": ["dine", "gofood", "grabfood", "snack"],
         "sort_order": 4,
     },
@@ -39,6 +47,7 @@ ACCOUNTS = [
         "display_name": "Groceries & Personal Care",
         "type": "expense",
         "monthly_budget": 281_000,
+        "per_day_budget": 1,
         "subcategories": [],
         "sort_order": 5,
     },
@@ -47,6 +56,7 @@ ACCOUNTS = [
         "display_name": "Transport",
         "type": "expense",
         "monthly_budget": 300_000,
+        "per_day_budget": 1,
         "subcategories": ["gopay", "ovo", "flazz"],
         "sort_order": 6,
     },
@@ -55,6 +65,7 @@ ACCOUNTS = [
         "display_name": "Wellness & Personal",
         "type": "expense",
         "monthly_budget": 338_000,
+        "per_day_budget": 0,
         "subcategories": ["haircut", "medicine", "nutrition"],
         "sort_order": 7,
     },
@@ -63,15 +74,26 @@ ACCOUNTS = [
         "display_name": "Social & Entertainment",
         "type": "expense",
         "monthly_budget": 850_000,
+        "per_day_budget": 0,
         "subcategories": ["hobbies", "social", "shopping"],
         "sort_order": 8,
     },
     {
         "slug": "savings",
-        "display_name": "Savings / Investment",
+        "display_name": "Savings",
         "type": "savings",
         "monthly_budget": 0,
+        "per_day_budget": 0,
         "subcategories": [],
         "sort_order": 9,
+    },
+    {
+        "slug": "investments",
+        "display_name": "Investments",
+        "type": "savings",
+        "monthly_budget": 12_000_000,
+        "per_day_budget": 0,
+        "subcategories": [],
+        "sort_order": 10,
     },
 ]
