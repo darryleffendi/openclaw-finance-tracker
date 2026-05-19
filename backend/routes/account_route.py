@@ -7,6 +7,7 @@ from backend.repositories.account_repository import (
     get_accounts,
     update_account,
 )
+from backend.services.recurring_service import materialize_if_needed
 
 bp = Blueprint("accounts", __name__)
 
@@ -14,6 +15,7 @@ bp = Blueprint("accounts", __name__)
 @bp.get("/api/accounts")
 @login_required
 def accounts():
+    materialize_if_needed()
     return jsonify(get_accounts())
 
 

@@ -9,6 +9,7 @@ from backend.routes import (
     auth_route,
     bucket_route,
     distribute_route,
+    recurring_route,
     summary_route,
     today_route,
     transaction_route,
@@ -26,6 +27,7 @@ app.register_blueprint(transaction_route.bp)
 app.register_blueprint(account_route.bp)
 app.register_blueprint(bucket_route.bp)
 app.register_blueprint(today_route.bp)
+app.register_blueprint(recurring_route.bp)
 app.register_blueprint(summary_route.bp)
 app.register_blueprint(distribute_route.bp)
 
