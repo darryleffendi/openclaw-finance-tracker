@@ -3,6 +3,7 @@ import { useDashboardData, bucketsBySlug, spentForAccount } from "./lib/dashboar
 import MobileDashboard from "./components/mobile/MobileDashboard"
 import CategoryDetail from "./components/screens/CategoryDetail"
 import AddTransactionSheet from "./components/sheets/AddTransactionSheet"
+import EditTransactionSheet from "./components/sheets/EditTransactionSheet"
 
 const PERIODS = {
   today: "Today",
@@ -15,7 +16,7 @@ const PERIODS = {
 export default function App() {
   const [period] = useState("this-month")
   const [screen, setScreen] = useState({ name: "home" })
-  const [sheet, setSheet] = useState(null) // 'add' | null
+  const [sheet, setSheet] = useState(null) // {kind:'add'} | {kind:'edit', tx} | null
   const data = useDashboardData(period)
 
   const bucketMap = useMemo(() => bucketsBySlug(data.buckets), [data.buckets])
@@ -23,6 +24,8 @@ export default function App() {
   const ymd = data.today?.date || ""
   const day = Number(ymd.split("-")[2]) || 1
   const totalDays = day + (data.today?.days_remaining ?? 1) - 1
+
+  const onTxTap = (tx) => setSheet({ kind: "edit", tx })
 
   let content
   if (screen.name === "category" && data.accounts) {
@@ -35,6 +38,7 @@ export default function App() {
           dayOfMonth={day}
           daysInMonth={totalDays}
           onBack={() => setScreen({ name: "home" })}
+          onTxTap={onTxTap}
         />
       )
     }
@@ -47,9 +51,9 @@ export default function App() {
         periodLabel={PERIODS[period]}
         onPeriodTap={() => {}}
         onSettings={() => {}}
-        onAdd={() => setSheet("add")}
+        onAdd={() => setSheet({ kind: "add" })}
         onAccountTap={(slug) => setScreen({ name: "category", slug })}
-        onTxTap={() => {}}
+        onTxTap={onTxTap}
       />
     )
   }
@@ -57,11 +61,19 @@ export default function App() {
   return (
     <>
       {content}
-      {sheet === "add" && (
+      {sheet?.kind === "add" && (
         <AddTransactionSheet
           accounts={data.accounts}
           onClose={() => setSheet(null)}
           onAdded={() => data.refresh()}
+        />
+      )}
+      {sheet?.kind === "edit" && (
+        <EditTransactionSheet
+          tx={sheet.tx}
+          accounts={data.accounts}
+          onClose={() => setSheet(null)}
+          onSaved={() => data.refresh()}
         />
       )}
     </>
