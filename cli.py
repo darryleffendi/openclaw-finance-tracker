@@ -9,6 +9,7 @@ from backend.repositories.transaction_repository import (
     get_transactions_by_period,
 )
 from backend.services.distribution_service import distribute_salary
+from backend.services.today_service import get_today
 from backend.services.summary_service import get_summary
 from backend.services.transaction_service import delete_transaction, insert_transaction
 
@@ -60,6 +61,9 @@ def main():
     set_account_parser.add_argument("--subcategories", default=None,
                                     help="Comma-separated subcategory list, e.g. 'dine,gofood,snack' (use empty string to clear)")
     set_account_parser.add_argument("--display-name", default=None, help="Display name")
+
+    # Today's allowance
+    subparsers.add_parser("today", help="Show today's daily spending allowance")
 
     # Distribute
     distribute_parser = subparsers.add_parser("distribute", help="Manually distribute funds to expense accounts")
@@ -127,6 +131,9 @@ def main():
             print(json.dumps({"success": False, "error": "Account not found"}))
             sys.exit(1)
         print(json.dumps({"success": True, "account": get_account(args.slug)}, indent=2))
+
+    elif args.command == "today":
+        print(json.dumps(get_today(), indent=2))
 
     elif args.command == "distribute":
         result = distribute_salary(args.amount, args.source_account)
