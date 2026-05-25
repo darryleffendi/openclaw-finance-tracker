@@ -11,7 +11,7 @@ export default function MobileHeader({
 }) {
   return (
     <div className="h-[52px] px-4 flex items-center justify-between border-b border-border bg-bg sticky top-0 z-[5]">
-      <div className="text-[13px] font-semibold tracking-[0.02em] text-fg-muted">
+      <div className="text-[13px] font-semibold tracking-[0.02em]">
         rupiah<span className="text-accent">.</span>
       </div>
       <button
