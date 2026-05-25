@@ -28,31 +28,15 @@ const DONUT_COLORS = [
 function DesktopStat({ label, value, color = TOKENS.fg, divider }) {
   return (
     <div
-      style={{
-        padding: "18px 22px",
-        borderLeft: divider ? `1px solid ${TOKENS.border}` : "none",
-      }}
+      className="py-[18px] px-[22px]"
+      style={divider ? { borderLeft: `1px solid ${TOKENS.border}` } : undefined}
     >
-      <div
-        style={{
-          fontSize: 11,
-          color: TOKENS.fgDim,
-          textTransform: "uppercase",
-          letterSpacing: "0.06em",
-          fontWeight: 500,
-        }}
-      >
+      <div className="text-[11px] text-fg-dim uppercase tracking-[0.06em] font-medium">
         {label}
       </div>
       <div
-        style={{
-          fontSize: 22,
-          fontWeight: 500,
-          color,
-          fontVariantNumeric: "tabular-nums",
-          letterSpacing: "-0.02em",
-          marginTop: 6,
-        }}
+        className="text-[22px] font-medium tabular-nums tracking-[-0.02em] mt-1.5"
+        style={{ color }}
       >
         {value}
       </div>
@@ -62,23 +46,8 @@ function DesktopStat({ label, value, color = TOKENS.fg, divider }) {
 
 function SectionLabel({ children, right }) {
   return (
-    <div
-      style={{
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "baseline",
-        marginBottom: 12,
-      }}
-    >
-      <div
-        style={{
-          fontSize: 11,
-          color: TOKENS.fgDim,
-          textTransform: "uppercase",
-          letterSpacing: "0.08em",
-          fontWeight: 600,
-        }}
-      >
+    <div className="flex justify-between items-baseline mb-3">
+      <div className="text-[11px] text-fg-dim uppercase tracking-[0.08em] font-semibold">
         {children}
       </div>
       {right}
@@ -102,16 +71,7 @@ export default function DesktopDashboard({
 
   if (!accounts) {
     return (
-      <div
-        style={{
-          background: TOKENS.bg,
-          color: TOKENS.fgMuted,
-          minHeight: "100vh",
-          padding: 64,
-          textAlign: "center",
-          fontSize: 13,
-        }}
-      >
+      <div className="bg-bg text-fg-muted min-h-screen p-16 text-center text-[13px]">
         Loading…
       </div>
     )
@@ -152,140 +112,47 @@ export default function DesktopDashboard({
   const net = income - totalExpense
 
   return (
-    <div
-      style={{
-        background: TOKENS.bg,
-        color: TOKENS.fg,
-        minHeight: "100vh",
-        fontFamily: "inherit",
-      }}
-    >
+    <div className="bg-bg text-fg min-h-screen">
       {/* Top bar */}
-      <div
-        style={{
-          height: 56,
-          padding: "0 32px",
-          borderBottom: `1px solid ${TOKENS.border}`,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          background: TOKENS.bg,
-          position: "sticky",
-          top: 0,
-          zIndex: 5,
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: 24 }}>
-          <div
-            style={{
-              fontSize: 14,
-              fontWeight: 600,
-              letterSpacing: "0.01em",
-            }}
-          >
-            rupiah<span style={{ color: "var(--accent)" }}>.</span>
+      <div className="h-14 px-8 border-b border-border flex items-center justify-between bg-bg sticky top-0 z-[5]">
+        <div className="flex items-center gap-6">
+          <div className="text-[14px] font-semibold tracking-[0.01em]">
+            rupiah<span className="text-accent">.</span>
           </div>
         </div>
         <button
           onClick={onPeriodTap}
-          style={{
-            background: TOKENS.card,
-            border: `1px solid ${TOKENS.border}`,
-            color: TOKENS.fg,
-            fontSize: 13,
-            fontWeight: 500,
-            padding: "8px 14px",
-            borderRadius: 8,
-            display: "flex",
-            alignItems: "center",
-            gap: 8,
-            cursor: "pointer",
-            fontFamily: "inherit",
-          }}
+          className="bg-card border border-border text-fg text-[13px] font-medium py-2 px-3.5 rounded-lg flex items-center gap-2 cursor-pointer"
         >
-          <Icon.Calendar size={13} color={TOKENS.fgMuted} />
+          <Icon.Calendar size={13} color="#8e95a4" />
           <span>{periodLabel}</span>
-          <Icon.ChevD size={14} color={TOKENS.fgMuted} />
+          <Icon.ChevD size={14} color="#8e95a4" />
         </button>
-        <div style={{ display: "flex", gap: 8 }}>
+        <div className="flex gap-2">
           <button
             onClick={onAdd}
-            style={{
-              background: "var(--accent)",
-              border: "none",
-              color: "white",
-              fontSize: 12.5,
-              fontWeight: 500,
-              padding: "7px 14px",
-              borderRadius: 8,
-              display: "flex",
-              alignItems: "center",
-              gap: 6,
-              cursor: "pointer",
-              fontFamily: "inherit",
-            }}
+            className="bg-accent border-0 text-white text-[12.5px] font-medium py-[7px] px-3.5 rounded-lg flex items-center gap-1.5 cursor-pointer"
           >
             <Icon.Plus size={14} /> Add transaction
           </button>
           <button
             onClick={onSettings}
-            style={{
-              width: 36,
-              height: 36,
-              borderRadius: 8,
-              background: TOKENS.card,
-              border: `1px solid ${TOKENS.border}`,
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
+            className="w-9 h-9 rounded-lg bg-card border border-border cursor-pointer flex items-center justify-center"
           >
-            <Icon.Settings size={16} color={TOKENS.fgMuted} />
+            <Icon.Settings size={16} color="#8e95a4" />
           </button>
         </div>
       </div>
 
       {/* Two-column body */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "minmax(0, 1fr) 380px",
-          minHeight: "calc(100vh - 56px)",
-        }}
-      >
+      <div className="grid min-h-[calc(100vh-56px)]" style={{ gridTemplateColumns: "minmax(0,1fr) 380px" }}>
         {/* Left */}
-        <div
-          style={{
-            padding: "24px 32px 60px",
-            display: "flex",
-            flexDirection: "column",
-            gap: 24,
-            borderRight: `1px solid ${TOKENS.border}`,
-          }}
-        >
+        <div className="px-8 pt-6 pb-[60px] flex flex-col gap-6 border-r border-border">
           <HeroRing today={today} spentToday={spentToday} />
 
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "1fr 1fr 1fr",
-              background: TOKENS.bgSoft,
-              border: `1px solid ${TOKENS.border}`,
-              borderRadius: 12,
-              overflow: "hidden",
-            }}
-          >
-            <DesktopStat
-              label="Income"
-              value={formatIDR(income)}
-              color={TOKENS.income}
-            />
-            <DesktopStat
-              label="Expense"
-              value={formatIDR(totalExpense)}
-              divider
-            />
+          <div className="grid grid-cols-3 bg-bg-soft border border-border rounded-xl overflow-hidden">
+            <DesktopStat label="Income" value={formatIDR(income)} color={TOKENS.income} />
+            <DesktopStat label="Expense" value={formatIDR(totalExpense)} divider />
             <DesktopStat
               label="Net"
               value={formatIDR(net)}
@@ -297,25 +164,12 @@ export default function DesktopDashboard({
           <div>
             <SectionLabel
               right={
-                <span
-                  style={{
-                    fontSize: 11.5,
-                    color: TOKENS.fgDim,
-                  }}
-                >
-                  {accounts.length} total
-                </span>
+                <span className="text-[11.5px] text-fg-dim">{accounts.length} total</span>
               }
             >
               Accounts
             </SectionLabel>
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))",
-                gap: 12,
-              }}
-            >
+            <div className="grid gap-3" style={{ gridTemplateColumns: "repeat(auto-fill,minmax(260px,1fr))" }}>
               {expenseAccounts.map((a) => {
                 const spent = spentForAccount(a, bucketMap[a.slug])
                 const sparkValues = buildSparkline(transactions, a.slug)
@@ -350,51 +204,17 @@ export default function DesktopDashboard({
             <div>
               <SectionLabel>Spending breakdown</SectionLabel>
               <Card padding={20}>
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 24,
-                  }}
-                >
+                <div className="flex items-center gap-6">
                   <Donut data={donut} size={160} stroke={22} />
-                  <div
-                    style={{
-                      flex: 1,
-                      display: "flex",
-                      flexDirection: "column",
-                      gap: 8,
-                    }}
-                  >
+                  <div className="flex-1 flex flex-col gap-2">
                     {donut.map((d) => (
-                      <div
-                        key={d.name}
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: 8,
-                          fontSize: 12.5,
-                        }}
-                      >
+                      <div key={d.name} className="flex items-center gap-2 text-[12.5px]">
                         <span
-                          style={{
-                            width: 10,
-                            height: 10,
-                            borderRadius: 2,
-                            background: d.color,
-                          }}
+                          className="w-2.5 h-2.5 rounded-[2px] shrink-0"
+                          style={{ background: d.color }}
                         />
-                        <span style={{ flex: 1, color: TOKENS.fgMuted }}>
-                          {d.name}
-                        </span>
-                        <span
-                          style={{
-                            color: TOKENS.fg,
-                            fontVariantNumeric: "tabular-nums",
-                          }}
-                        >
-                          {formatIDRShort(d.value)}
-                        </span>
+                        <span className="flex-1 text-fg-muted">{d.name}</span>
+                        <span className="text-fg tabular-nums">{formatIDRShort(d.value)}</span>
                       </div>
                     ))}
                   </div>
@@ -405,43 +225,12 @@ export default function DesktopDashboard({
         </div>
 
         {/* Right: sticky transaction rail */}
-        <div
-          style={{
-            position: "sticky",
-            top: 56,
-            alignSelf: "start",
-            height: "calc(100vh - 56px)",
-            display: "flex",
-            flexDirection: "column",
-            background: TOKENS.bgSoft,
-          }}
-        >
-          <div
-            style={{
-              padding: "20px 24px 12px",
-              borderBottom: `1px solid ${TOKENS.border}`,
-            }}
-          >
-            <div
-              style={{
-                fontSize: 11,
-                color: TOKENS.fgDim,
-                textTransform: "uppercase",
-                letterSpacing: "0.08em",
-                fontWeight: 600,
-                marginBottom: 12,
-              }}
-            >
+        <div className="sticky top-14 self-start bg-bg-soft flex flex-col" style={{ height: "calc(100vh - 56px)" }}>
+          <div className="px-6 pt-5 pb-3 border-b border-border">
+            <div className="text-[11px] text-fg-dim uppercase tracking-[0.08em] font-semibold mb-3">
               Transactions
             </div>
-            <div
-              style={{
-                display: "flex",
-                gap: 6,
-                overflowX: "auto",
-                paddingBottom: 4,
-              }}
-            >
+            <div className="flex gap-1.5 overflow-x-auto pb-1">
               {filters.map((f) => (
                 <Chip
                   key={f}
@@ -455,22 +244,9 @@ export default function DesktopDashboard({
               ))}
             </div>
           </div>
-          <div
-            style={{
-              flex: 1,
-              overflowY: "auto",
-              padding: "0 24px 24px",
-            }}
-          >
+          <div className="flex-1 overflow-y-auto px-6 pb-6">
             {filteredTxs.length === 0 ? (
-              <div
-                style={{
-                  fontSize: 12,
-                  color: TOKENS.fgDim,
-                  padding: 24,
-                  textAlign: "center",
-                }}
-              >
+              <div className="text-[12px] text-fg-dim p-6 text-center">
                 No transactions in this period.
               </div>
             ) : (

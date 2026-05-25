@@ -8,19 +8,11 @@ import Card from "../ui/Card"
 import AccountTile from "../ui/AccountTile"
 import ProgressBar from "../ui/ProgressBar"
 import TxRow from "../mobile/TxRow"
-import { iconBtnStyle } from "../mobile/MobileHeader"
+import { ICON_BTN_BASE } from "../mobile/MobileHeader"
 
 function SectionLabel({ children }) {
   return (
-    <div
-      style={{
-        fontSize: 11,
-        color: TOKENS.fgDim,
-        textTransform: "uppercase",
-        letterSpacing: "0.08em",
-        fontWeight: 600,
-      }}
-    >
+    <div className="text-[11px] text-fg-dim uppercase tracking-[0.08em] font-semibold">
       {children}
     </div>
   )
@@ -78,76 +70,32 @@ export default function CategoryDetail({
   const maxBreakdown = Math.max(1, ...breakdown.map((b) => b.amount))
 
   return (
-    <div style={{ background: TOKENS.bg, color: TOKENS.fg, minHeight: "100%" }}>
-      <div
-        style={{
-          height: 52,
-          padding: "0 16px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          borderBottom: `1px solid ${TOKENS.border}`,
-          position: "sticky",
-          top: 0,
-          background: TOKENS.bg,
-          zIndex: 5,
-        }}
-      >
-        <button onClick={onBack} style={iconBtnStyle()}>
-          <Icon.ChevL size={20} color={TOKENS.fg} />
+    <div className="bg-bg text-fg min-h-full">
+      <div className="h-[52px] px-4 flex items-center justify-between border-b border-border sticky top-0 bg-bg z-[5]">
+        <button onClick={onBack} className={`${ICON_BTN_BASE} bg-transparent`}>
+          <Icon.ChevL size={20} color="#e7eaf0" />
         </button>
-        <div style={{ fontSize: 14, fontWeight: 500 }}>
-          {account.display_name}
-        </div>
-        <div style={{ width: 32 }} />
+        <div className="text-[14px] font-medium">{account.display_name}</div>
+        <div className="w-8" />
       </div>
 
-      <div
-        style={{
-          padding: "20px 16px 90px",
-          display: "flex",
-          flexDirection: "column",
-          gap: 20,
-        }}
-      >
+      <div className="px-4 pt-5 pb-[90px] flex flex-col gap-5">
         <Card padding={20}>
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 12,
-              marginBottom: 16,
-            }}
-          >
+          <div className="flex items-center gap-3 mb-4">
             <AccountTile id={account.slug} size={44} />
             <div>
-              <div
-                style={{
-                  fontSize: 11,
-                  color: TOKENS.fgDim,
-                  letterSpacing: "0.06em",
-                  textTransform: "uppercase",
-                }}
-              >
+              <div className="text-[11px] text-fg-dim tracking-[0.06em] uppercase">
                 {over ? "Over budget" : "Remaining"}
               </div>
               <div
-                style={{
-                  fontSize: 26,
-                  fontWeight: 500,
-                  letterSpacing: "-0.02em",
-                  color: over ? TOKENS.red : TOKENS.fg,
-                  fontVariantNumeric: "tabular-nums",
-                  marginTop: 2,
-                }}
+                className="text-[26px] font-medium tracking-[-0.02em] tabular-nums mt-0.5"
+                style={{ color: over ? TOKENS.red : TOKENS.fg }}
               >
                 {formatIDR(Math.abs(remaining))}
               </div>
             </div>
           </div>
-          <div
-            style={{ fontSize: 12, color: TOKENS.fgMuted, marginBottom: 8 }}
-          >
+          <div className="text-[12px] text-fg-muted mb-2">
             Spent {formatIDR(spent)} of {formatIDR(budget)}
           </div>
           <ProgressBar
@@ -162,56 +110,21 @@ export default function CategoryDetail({
         {breakdown.length > 0 && (
           <div>
             <SectionLabel>Subcategories</SectionLabel>
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: 10,
-                marginTop: 12,
-              }}
-            >
+            <div className="flex flex-col gap-2.5 mt-3">
               {breakdown.map((b) => (
                 <div key={b.name}>
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      marginBottom: 4,
-                    }}
-                  >
-                    <span
-                      style={{
-                        fontSize: 12.5,
-                        color: TOKENS.fg,
-                        textTransform: "capitalize",
-                      }}
-                    >
-                      {b.name}
-                    </span>
-                    <span
-                      style={{
-                        fontSize: 12.5,
-                        color: TOKENS.fgMuted,
-                        fontVariantNumeric: "tabular-nums",
-                      }}
-                    >
+                  <div className="flex justify-between mb-1">
+                    <span className="text-[12.5px] text-fg capitalize">{b.name}</span>
+                    <span className="text-[12.5px] text-fg-muted tabular-nums">
                       {formatIDR(b.amount)}
                     </span>
                   </div>
-                  <div
-                    style={{
-                      height: 4,
-                      background: TOKENS.border,
-                      borderRadius: 2,
-                      overflow: "hidden",
-                    }}
-                  >
+                  <div className="h-1 bg-border rounded-[2px] overflow-hidden">
                     <div
+                      className="h-full rounded-[2px]"
                       style={{
                         width: `${(b.amount / maxBreakdown) * 100}%`,
-                        height: "100%",
                         background: color,
-                        borderRadius: 2,
                       }}
                     />
                   </div>
@@ -223,40 +136,16 @@ export default function CategoryDetail({
 
         <div>
           <SectionLabel>Transactions</SectionLabel>
-          <div style={{ marginTop: 8 }}>
+          <div className="mt-2">
             {error && (
-              <div
-                style={{
-                  fontSize: 12,
-                  color: TOKENS.red,
-                  padding: 12,
-                }}
-              >
+              <div className="text-[12px] text-red p-3">
                 Failed to load transactions.
               </div>
             )}
             {txs == null && !error ? (
-              <div
-                style={{
-                  fontSize: 12,
-                  color: TOKENS.fgDim,
-                  padding: 16,
-                  textAlign: "center",
-                }}
-              >
-                Loading…
-              </div>
+              <div className="text-[12px] text-fg-dim p-4 text-center">Loading…</div>
             ) : visibleTxs.length === 0 ? (
-              <div
-                style={{
-                  fontSize: 12,
-                  color: TOKENS.fgDim,
-                  padding: 16,
-                  textAlign: "center",
-                }}
-              >
-                No transactions yet
-              </div>
+              <div className="text-[12px] text-fg-dim p-4 text-center">No transactions yet</div>
             ) : (
               visibleTxs.map((t) => (
                 <TxRow

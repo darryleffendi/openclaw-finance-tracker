@@ -1,7 +1,6 @@
 import { useState } from "react"
-import { TOKENS } from "../../lib/tokens"
 import { Icon } from "../../lib/icons"
-import { iconBtnStyle } from "../mobile/MobileHeader"
+import { ICON_BTN_BASE } from "../mobile/MobileHeader"
 
 import BudgetsTab from "./settings/BudgetsTab"
 import SubcategoriesTab from "./settings/SubcategoriesTab"
@@ -12,58 +11,32 @@ const TABS = ["budgets", "subcategories", "recurring"]
 export default function Settings({ accounts, onAccountChange, onBack }) {
   const [tab, setTab] = useState("budgets")
   return (
-    <div style={{ background: TOKENS.bg, color: TOKENS.fg, minHeight: "100%" }}>
-      <div
-        style={{
-          height: 52,
-          padding: "0 16px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          borderBottom: `1px solid ${TOKENS.border}`,
-          position: "sticky",
-          top: 0,
-          background: TOKENS.bg,
-          zIndex: 5,
-        }}
-      >
-        <button onClick={onBack} style={iconBtnStyle()}>
-          <Icon.ChevL size={20} color={TOKENS.fg} />
+    <div className="bg-bg text-fg min-h-full">
+      <div className="h-[52px] px-4 flex items-center justify-between border-b border-border sticky top-0 bg-bg z-[5]">
+        <button onClick={onBack} className={`${ICON_BTN_BASE} bg-transparent`}>
+          <Icon.ChevL size={20} color="#e7eaf0" />
         </button>
-        <div style={{ fontSize: 14, fontWeight: 500 }}>Settings</div>
-        <div style={{ width: 32 }} />
+        <div className="text-[14px] font-medium">Settings</div>
+        <div className="w-8" />
       </div>
 
-      <div
-        style={{
-          display: "flex",
-          borderBottom: `1px solid ${TOKENS.border}`,
-          padding: "0 16px",
-        }}
-      >
+      <div className="flex border-b border-border px-4">
         {TABS.map((t) => (
           <button
             key={t}
             onClick={() => setTab(t)}
-            style={{
-              background: "transparent",
-              border: "none",
-              padding: "12px 14px",
-              fontSize: 12.5,
-              fontWeight: 500,
-              cursor: "pointer",
-              color: tab === t ? TOKENS.fg : TOKENS.fgDim,
-              borderBottom: `2px solid ${tab === t ? "var(--accent)" : "transparent"}`,
-              textTransform: "capitalize",
-              fontFamily: "inherit",
-            }}
+            className={`bg-transparent border-0 py-3 px-3.5 text-[12.5px] font-medium cursor-pointer capitalize border-b-2 ${
+              tab === t
+                ? "text-fg border-accent"
+                : "text-fg-dim border-transparent"
+            }`}
           >
             {t}
           </button>
         ))}
       </div>
 
-      <div style={{ padding: 16 }}>
+      <div className="p-4">
         {tab === "budgets" && (
           <BudgetsTab accounts={accounts} onAccountChange={onAccountChange} />
         )}
@@ -76,41 +49,14 @@ export default function Settings({ accounts, onAccountChange, onBack }) {
         {tab === "recurring" && <RecurringTab accounts={accounts} />}
       </div>
 
-      <div
-        style={{
-          padding: "20px 16px",
-          borderTop: `1px solid ${TOKENS.border}`,
-          marginTop: 24,
-        }}
-      >
+      <div className="py-5 px-4 border-t border-border mt-6">
         <a
           href="/api/auth/logout"
-          style={{
-            display: "flex",
-            width: "100%",
-            padding: 12,
-            background: "transparent",
-            border: `1px solid ${TOKENS.border}`,
-            borderRadius: 10,
-            color: TOKENS.fgMuted,
-            fontSize: 13,
-            cursor: "pointer",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: 8,
-            textDecoration: "none",
-          }}
+          className="flex w-full p-3 bg-transparent border border-border rounded-[10px] text-fg-muted text-[13px] cursor-pointer items-center justify-center gap-2 no-underline"
         >
           <Icon.Logout size={14} /> Sign out
         </a>
-        <div
-          style={{
-            textAlign: "center",
-            fontSize: 11,
-            color: TOKENS.fgDim,
-            marginTop: 12,
-          }}
-        >
+        <div className="text-center text-[11px] text-fg-dim mt-3">
           rupiah · v2
         </div>
       </div>

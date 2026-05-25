@@ -1,90 +1,25 @@
-import { TOKENS } from "../../lib/tokens"
 import { Icon } from "../../lib/icons"
 
 export default function Login() {
   return (
-    <div
-      style={{
-        background: TOKENS.bg,
-        color: TOKENS.fg,
-        minHeight: "100vh",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: "0 32px",
-        textAlign: "center",
-      }}
-    >
-      <div
-        style={{
-          width: 56,
-          height: 56,
-          borderRadius: 16,
-          background: "linear-gradient(135deg, var(--accent), var(--accent))",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          marginBottom: 24,
-          boxShadow: "0 8px 24px var(--accent-glow)",
-        }}
-      >
-        <span
-          style={{
-            fontSize: 26,
-            fontWeight: 600,
-            color: "white",
-            letterSpacing: "-0.05em",
-          }}
-        >
-          R
-        </span>
+    <div className="bg-bg text-fg min-h-screen flex flex-col items-center justify-center px-8 text-center">
+      <div className="w-14 h-14 rounded-2xl bg-accent flex items-center justify-center mb-6 shadow-[0_8px_24px_var(--accent-glow)]">
+        <span className="text-[26px] font-semibold text-white tracking-[-0.05em]">R</span>
       </div>
-      <div
-        style={{
-          fontSize: 26,
-          fontWeight: 600,
-          letterSpacing: "-0.025em",
-        }}
-      >
-        rupiah<span style={{ color: "var(--accent)" }}>.</span>
+      <div className="text-[26px] font-semibold tracking-[-0.025em]">
+        rupiah<span className="text-accent">.</span>
       </div>
-      <div
-        style={{
-          fontSize: 14,
-          color: TOKENS.fgMuted,
-          marginTop: 8,
-          marginBottom: 48,
-        }}
-      >
+      <div className="text-[14px] text-fg-muted mt-2 mb-12">
         Your money, at a glance.
       </div>
       <a
         href="/api/auth/login"
-        style={{
-          width: "100%",
-          maxWidth: 320,
-          height: 48,
-          borderRadius: 12,
-          border: `1px solid ${TOKENS.border}`,
-          background: TOKENS.card,
-          color: TOKENS.fg,
-          fontSize: 14,
-          fontWeight: 500,
-          cursor: "pointer",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          gap: 10,
-          textDecoration: "none",
-        }}
+        className="w-full max-w-xs h-12 rounded-xl border border-border bg-card text-fg text-[14px] font-medium cursor-pointer flex items-center justify-center gap-2.5 no-underline"
       >
         <Icon.Google size={18} />
         Sign in with Google
       </a>
-      <div
-        style={{ fontSize: 11.5, color: TOKENS.fgDim, marginTop: 24 }}
-      >
+      <div className="text-[11.5px] text-fg-dim mt-6">
         Single-account access.
       </div>
     </div>
