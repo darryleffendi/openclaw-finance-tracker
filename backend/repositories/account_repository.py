@@ -2,7 +2,7 @@ import json
 
 from backend.db import get_connection
 
-ALLOWED_UPDATE_FIELDS = {"monthly_budget", "per_day_budget", "subcategories", "display_name"}
+ALLOWED_UPDATE_FIELDS = {"monthly_budget", "daily_budget_enabled", "subcategories", "display_name"}
 
 
 # ── Operations that take a caller-supplied connection ──────────────────────
@@ -52,7 +52,7 @@ def get_account(slug: str):
 
 def update_account(slug: str, **fields) -> bool:
     """
-    Partial update. Accepts any subset of: monthly_budget, per_day_budget,
+    Partial update. Accepts any subset of: monthly_budget, daily_budget_enabled,
     subcategories (list[str]), display_name. Unknown keys raise ValueError.
     Returns True if a row was updated, False if slug not found.
     """

@@ -40,14 +40,18 @@ def init_db():
                 display_name   TEXT    NOT NULL,
                 type           TEXT    NOT NULL CHECK(type IN ('income', 'expense', 'holding', 'savings')),
                 monthly_budget REAL    NOT NULL DEFAULT 0,
-                per_day_budget INTEGER NOT NULL DEFAULT 0,
+                daily_budget_enabled INTEGER NOT NULL DEFAULT 0,
                 subcategories  TEXT    NOT NULL DEFAULT '[]',
                 sort_order     INTEGER NOT NULL DEFAULT 0,
                 created_at     TEXT    DEFAULT (datetime('now'))
             )
         """)
-        # Idempotent ALTER for live DBs created before per_day_budget existed
-        _ensure_column(conn, "accounts", "per_day_budget", "INTEGER NOT NULL DEFAULT 0")
+        # Rename per_day_budget → daily_budget_enabled (idempotent, all three cases)
+        cols = {row["name"] for row in conn.execute("PRAGMA table_info(accounts)").fetchall()}
+        if "per_day_budget" in cols and "daily_budget_enabled" not in cols:
+            conn.execute("ALTER TABLE accounts RENAME COLUMN per_day_budget TO daily_budget_enabled")
+        elif "daily_budget_enabled" not in cols:
+            _ensure_column(conn, "accounts", "daily_budget_enabled", "INTEGER NOT NULL DEFAULT 0")
 
         conn.execute("""
             CREATE TABLE IF NOT EXISTS account_buckets (
@@ -83,7 +87,7 @@ def init_db():
             conn.execute(
                 """
                 INSERT OR IGNORE INTO accounts
-                    (slug, display_name, type, monthly_budget, per_day_budget, subcategories, sort_order)
+                    (slug, display_name, type, monthly_budget, daily_budget_enabled, subcategories, sort_order)
                 VALUES (?, ?, ?, ?, ?, ?, ?)
                 """,
                 (
@@ -91,7 +95,7 @@ def init_db():
                     acct["display_name"],
                     acct["type"],
                     acct["monthly_budget"],
-                    acct["per_day_budget"],
+                    acct["daily_budget_enabled"],
                     json.dumps(acct["subcategories"]),
                     acct["sort_order"],
                 ),

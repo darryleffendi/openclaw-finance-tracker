@@ -60,7 +60,7 @@ python3 cli.py query --period this-month --summary
 
 ```bash
 python3 cli.py today
-# Returns total daily allowance + per-category breakdown for accounts with per_day_budget=1
+# Returns total daily allowance + per-category breakdown for accounts with daily_budget_enabled=1
 # Formula per account: (monthly_budget - spent_this_month) / days_remaining_in_month
 ```
 
@@ -68,7 +68,7 @@ python3 cli.py today
 
 ```bash
 python3 cli.py accounts
-# Returns all accounts with slug, display_name, type, monthly_budget, per_day_budget, subcategories
+# Returns all accounts with slug, display_name, type, monthly_budget, daily_budget_enabled, subcategories
 ```
 
 ## Updating an Account

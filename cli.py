@@ -70,7 +70,7 @@ def main():
     set_account_parser = subparsers.add_parser("set-account", help="Update any account fields (partial)")
     set_account_parser.add_argument("--slug", required=True, help="Account slug")
     set_account_parser.add_argument("--monthly-budget", type=float, default=None, help="New monthly budget in IDR")
-    set_account_parser.add_argument("--per-day-budget", type=int, choices=[0, 1], default=None,
+    set_account_parser.add_argument("--daily-budget-enabled", type=int, choices=[0, 1], default=None,
                                     help="Whether this account contributes to today's allowance (0 or 1)")
     set_account_parser.add_argument("--subcategories", default=None,
                                     help="Comma-separated subcategory list, e.g. 'dine,gofood,snack' (use empty string to clear)")
@@ -170,14 +170,14 @@ def main():
         fields = {}
         if args.monthly_budget is not None:
             fields["monthly_budget"] = args.monthly_budget
-        if args.per_day_budget is not None:
-            fields["per_day_budget"] = args.per_day_budget
+        if args.daily_budget_enabled is not None:
+            fields["daily_budget_enabled"] = args.daily_budget_enabled
         if args.subcategories is not None:
             fields["subcategories"] = [s.strip() for s in args.subcategories.split(",") if s.strip()]
         if args.display_name is not None:
             fields["display_name"] = args.display_name
         if not fields:
-            print(json.dumps({"success": False, "error": "Supply at least one of --monthly-budget, --per-day-budget, --subcategories, --display-name"}))
+            print(json.dumps({"success": False, "error": "Supply at least one of --monthly-budget, --daily-budget-enabled, --subcategories, --display-name"}))
             sys.exit(1)
         try:
             ok = update_account(args.slug, **fields)

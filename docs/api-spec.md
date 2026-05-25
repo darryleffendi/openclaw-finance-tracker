@@ -44,7 +44,7 @@ Returns all accounts in display order. Also triggers lazy materialization of any
     "display_name": "Salary",
     "type": "income",
     "monthly_budget": 19875000.0,
-    "per_day_budget": 0,
+    "daily_budget_enabled": 0,
     "subcategories": [],
     "sort_order": 1,
     "created_at": "2026-04-07 17:57:10"
@@ -54,7 +54,7 @@ Returns all accounts in display order. Also triggers lazy materialization of any
     "display_name": "Food",
     "type": "expense",
     "monthly_budget": 2100000.0,
-    "per_day_budget": 1,
+    "daily_budget_enabled": 1,
     "subcategories": ["dine", "gofood", "grabfood", "snack"],
     "sort_order": 4,
     "created_at": "2026-04-07 17:57:10"
@@ -71,7 +71,7 @@ Returns all accounts in display order. Also triggers lazy materialization of any
 | `savings` | Savings or investment account |
 | `holding` | Intermediate holding (freelance funds) |
 
-**`per_day_budget`:** `1` = this account contributes to the Today's Allowance hero card; `0` = excluded. Currently `1` for: food, groceries, transport.
+**`daily_budget_enabled`:** `1` = this account contributes to the Today's Allowance hero card; `0` = excluded. Currently `1` for: food, groceries, transport.
 
 **All accounts (in sort order):**
 
@@ -99,7 +99,7 @@ Partial update of an account. Supply any subset of editable fields.
 ```json
 {
   "monthly_budget": 2500000,
-  "per_day_budget": 1,
+  "daily_budget_enabled": 1,
   "subcategories": ["dine", "gofood", "grabfood"],
   "display_name": "Food & Drink"
 }
@@ -165,7 +165,7 @@ Monthly aggregated balances keyed by `(slug, year_month)`. This is the primary s
 
 **All-time savings total:** Sum `income + auto_dist_in` across all months for that slug.
 
-**Budget remaining for `per_day_budget` accounts:** `monthly_budget − bucket.expense`
+**Budget remaining for `daily_budget_enabled` accounts:** `monthly_budget − bucket.expense`
 
 > Bucket rows are created on first transaction for a `(slug, month)` pair. An account with no activity in a month will have no bucket row for that month — treat missing rows as all zeros.
 
@@ -174,7 +174,7 @@ Monthly aggregated balances keyed by `(slug, year_month)`. This is the primary s
 ## Today's Allowance
 
 ### `GET /api/today`
-Computes today's daily spending allowance across all accounts with `per_day_budget = 1`. Also triggers lazy recurring materialization.
+Computes today's daily spending allowance across all accounts with `daily_budget_enabled = 1`. Also triggers lazy recurring materialization.
 
 **Formula per account:** `(monthly_budget − bucket.expense) / days_remaining_in_month` (days inclusive of today).
 
@@ -218,9 +218,9 @@ Computes today's daily spending allowance across all accounts with `per_day_budg
 - `total_allowance` — sum of all `daily_allowance` values; negative means over budget
 - `over_budget` — `true` when `total_allowance < 0`
 - `days_remaining` — calendar days left in the month, including today
-- `breakdown` — only accounts where `per_day_budget = 1`
+- `breakdown` — only accounts where `daily_budget_enabled = 1`
 
-> If no accounts have `per_day_budget = 1`, `breakdown` is empty and `total_allowance` is `0`.
+> If no accounts have `daily_budget_enabled = 1`, `breakdown` is empty and `total_allowance` is `0`.
 
 ---
 
@@ -559,7 +559,7 @@ All error responses have the same shape:
 
 **Today's allowance hero:**
 - Use `GET /api/today` directly; it does all the math
-- Only accounts with `per_day_budget = 1` appear in `breakdown`
+- Only accounts with `daily_budget_enabled = 1` appear in `breakdown`
 
 ### Salary auto-distribution badge
 Transactions where `note === "auto-distribution from salary"` are internal transfers, not real user expenses. Show them in the transaction list with a badge/indicator rather than as normal rows. They cannot be PATCH-edited — the parent salary row is the edit target.
@@ -580,7 +580,7 @@ new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFrac
 
 ```
 1. GET /api/auth/login          — if not authenticated (401 on any call)
-2. GET /api/accounts            — account metadata (slugs, types, budgets, per_day_budget)
+2. GET /api/accounts            — account metadata (slugs, types, budgets, daily_budget_enabled)
 3. GET /api/buckets?month=YYYY-MM  — monthly balances for all accounts
 4. GET /api/today               — hero card: daily allowance
 5. GET /api/summary?period=this-month  — top summary bar

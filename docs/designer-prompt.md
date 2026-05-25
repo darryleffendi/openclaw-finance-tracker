@@ -94,7 +94,7 @@ Three sections, tab- or accordion-style:
 - **Budgets**
   - Table/list of all 10 accounts.
   - Inline-edit `monthly_budget` (numeric IDR input).
-  - Toggle for `per_day_budget` (with a small "?" tooltip: "When on, this account contributes to today's allowance.").
+  - Toggle for `daily_budget_enabled` (with a small "?" tooltip: "When on, this account contributes to today's allowance.").
 - **Subcategories**
   - Per-account chip editor. Add a chip = type + Enter; remove a chip = click the ×.
 - **Recurring**

@@ -9,7 +9,7 @@ from backend.utils.date_utils import days_remaining_in_month
 def get_today():
     """
     Compute today's daily spending allowance across all accounts where
-    per_day_budget is enabled.
+    daily_budget_enabled is set.
 
     Formula per account:
         daily_allowance = (monthly_budget - spent_this_month) / days_remaining_in_month
@@ -25,7 +25,7 @@ def get_today():
     year_month = today_iso[:7]
     days_remaining = days_remaining_in_month(today_iso)
 
-    daily_accounts = [a for a in get_accounts() if a.get("per_day_budget")]
+    daily_accounts = [a for a in get_accounts() if a.get("daily_budget_enabled")]
 
     breakdown = []
     total = 0

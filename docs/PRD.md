@@ -53,7 +53,7 @@ Transaction *entry* is mostly via Telegram + OpenClaw; the dashboard is **read-m
 ### 5.1 Today's Allowance Card *(NEW — hero card)*
 
 - Top-of-dashboard hero, above per-account cards.
-- Shows total allowance for today summed across all accounts where `per_day_budget = true`.
+- Shows total allowance for today summed across all accounts where `daily_budget_enabled = true`.
 - Per-category formula:
   ```
   daily_allowance = (monthly_budget − spent_this_month) / days_remaining_in_month
@@ -135,7 +135,7 @@ Transaction *entry* is mostly via Telegram + OpenClaw; the dashboard is **read-m
 ### 5.9 Settings Page
 
 - Single page (or modal) with three sections:
-  - **Budgets** — list of accounts with editable `monthly_budget` and `per_day_budget` toggle.
+  - **Budgets** — list of accounts with editable `monthly_budget` and `daily_budget_enabled` toggle.
   - **Subcategories** — per-account JSON list editor (chip add/remove UI; underlying data is JSON in `accounts.subcategories`).
   - **Recurring** — list with create / edit / delete / enable-toggle / run-now.
 - Logout button at the bottom.
@@ -172,13 +172,13 @@ Auto-distribution semantics: when salary income is recorded, `distribute_within`
 ### 6.1 `accounts` table
 
 ```sql
-ALTER TABLE accounts ADD COLUMN per_day_budget INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE accounts ADD COLUMN daily_budget_enabled INTEGER NOT NULL DEFAULT 0;
 -- subcategories assumed to already exist as TEXT (JSON-encoded array)
 ```
 
 Seed updates:
 
-| Slug | per_day_budget |
+| Slug | daily_budget_enabled |
 |---|---|
 | food | 1 |
 | groceries | 1 |
@@ -260,7 +260,7 @@ CREATE INDEX IF NOT EXISTS idx_txn_category_date ON transactions(category, date)
 | PATCH | `/api/recurring/:id` | ✓ shipped | Update rule |
 | DELETE | `/api/recurring/:id` | ✓ shipped | Delete rule |
 | POST | `/api/recurring/run` | ✓ shipped | Force-materialize all enabled rules for current month |
-| PATCH | `/api/accounts/:slug` | ✓ shipped | Edit `monthly_budget`, `per_day_budget`, `subcategories`, `display_name` |
+| PATCH | `/api/accounts/:slug` | ✓ shipped | Edit `monthly_budget`, `daily_budget_enabled`, `subcategories`, `display_name` |
 
 ### Behavior changes — shipped ✓
 
@@ -271,19 +271,19 @@ CREATE INDEX IF NOT EXISTS idx_txn_category_date ON transactions(category, date)
 ## 8. Acceptance Criteria
 
 **Backend (verified)**
-- [x] Daily allowance updates immediately after adding/deleting a transaction (`per_day_budget=1` accounts only).
-- [x] Categories with `per_day_budget = false` do **not** appear in today's allowance.
+- [x] Daily allowance updates immediately after adding/deleting a transaction (`daily_budget_enabled=1` accounts only).
+- [x] Categories with `daily_budget_enabled = false` do **not** appear in today's allowance.
 - [x] First API read of a new month auto-creates recurring transactions with their configured `date` (day clamped to last day of month).
 - [x] Salary recurring rule triggers full auto-distribution cascade.
 - [x] Editing a salary transaction's amount re-distributes proportionally; deleting reverses cleanly.
-- [x] PATCH `/api/accounts/:slug` updates budget/per_day_budget/subcategories.
+- [x] PATCH `/api/accounts/:slug` updates budget/daily_budget_enabled/subcategories.
 - [x] PATCH `/api/transactions/:id` rejects auto-distribution rows with 400.
 - [x] All bucket invariants hold after every write operation.
 
 **Frontend (pending — owned separately)**
 - [ ] Negative remaining renders red, no NaN, no UI break.
 - [ ] Mobile (<768px) layout: hero allowance card + at least 2 account cards visible above the fold; charts collapsed.
-- [ ] Settings page allows editing all budgets, per_day_budget flags, subcategories, and recurring rules without touching the DB.
+- [ ] Settings page allows editing all budgets, daily_budget_enabled flags, subcategories, and recurring rules without touching the DB.
 - [ ] Period selector supports day/week/month with calendar picker, defaulting to current month.
 - [ ] Three-tier color states render correctly (green / yellow / orange / red).
 

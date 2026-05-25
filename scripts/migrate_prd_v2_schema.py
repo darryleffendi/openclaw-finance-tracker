@@ -2,11 +2,11 @@
 PRD v2 schema migration — additive, idempotent, schema-only.
 
 Run once after upgrading the codebase. Live data (existing account budgets,
-per_day_budget flags, etc.) is left untouched. Apply seed-value changes via
+daily_budget_enabled flags, etc.) is left untouched. Apply seed-value changes via
 `cli.py set-account` when ready.
 
 This script triggers init_db() which:
-  - Adds per_day_budget column (default 0) if absent
+  - Adds daily_budget_enabled column (default 0) if absent
   - Creates recurring_transactions table if absent
   - Creates idx_txn_date and idx_txn_category_date if absent
   - Inserts the new `investments` account row via INSERT OR IGNORE
@@ -44,7 +44,7 @@ def main():
         print("=== Verification ===")
 
         cols = {r["name"] for r in conn.execute("PRAGMA table_info(accounts)").fetchall()}
-        print(f"  accounts.per_day_budget present: {'per_day_budget' in cols}")
+        print(f"  accounts.daily_budget_enabled present: {'daily_budget_enabled' in cols}")
 
         tables = {r["name"] for r in conn.execute(
             "SELECT name FROM sqlite_master WHERE type='table'"
