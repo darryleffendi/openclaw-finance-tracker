@@ -1,44 +1,17 @@
-import { TOKENS } from "../../lib/tokens"
-
 // Bottom sheet shell — backdrop + rounded top + grabber handle.
 // Click outside the sheet to close.
 export default function SheetWrap({ onClose, children, maxHeight = "85%" }) {
   return (
     <div
       onClick={onClose}
-      style={{
-        position: "fixed",
-        inset: 0,
-        background: "rgba(0,0,0,0.5)",
-        backdropFilter: "blur(4px)",
-        display: "flex",
-        alignItems: "flex-end",
-        justifyContent: "center",
-        zIndex: 100,
-      }}
+      className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-end justify-center z-[100]"
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        style={{
-          width: "100%",
-          maxWidth: 520,
-          background: TOKENS.bgSoft,
-          borderRadius: "20px 20px 0 0",
-          borderTop: `1px solid ${TOKENS.border}`,
-          padding: "8px 0 24px",
-          maxHeight,
-          overflow: "auto",
-        }}
+        className="w-full max-w-[520px] bg-bg-soft rounded-t-[20px] border-t border-border py-2 pb-6 overflow-auto"
+        style={{ maxHeight }}
       >
-        <div
-          style={{
-            width: 36,
-            height: 4,
-            background: TOKENS.border,
-            borderRadius: 2,
-            margin: "6px auto 14px",
-          }}
-        />
+        <div className="w-9 h-1 bg-border rounded-[2px] mx-auto mt-1.5 mb-[14px]" />
         {children}
       </div>
     </div>
@@ -47,30 +20,15 @@ export default function SheetWrap({ onClose, children, maxHeight = "85%" }) {
 
 export function SheetHeader({ title, onClose, action }) {
   return (
-    <div
-      style={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        padding: "0 20px 16px",
-      }}
-    >
+    <div className="flex items-center justify-between px-5 pb-4">
       <button
         onClick={onClose}
-        style={{
-          background: "transparent",
-          border: "none",
-          color: TOKENS.fgMuted,
-          fontSize: 13,
-          cursor: "pointer",
-          fontFamily: "inherit",
-          padding: 0,
-        }}
+        className="bg-transparent border-0 text-fg-muted text-[13px] cursor-pointer p-0"
       >
         Cancel
       </button>
-      <div style={{ fontSize: 14, fontWeight: 500 }}>{title}</div>
-      {action || <div style={{ width: 48 }} />}
+      <div className="text-[14px] font-medium">{title}</div>
+      {action || <div className="w-12" />}
     </div>
   )
 }
@@ -80,18 +38,9 @@ export function SheetActionButton({ label, onClick, disabled }) {
     <button
       onClick={onClick}
       disabled={disabled}
-      style={{
-        background: disabled ? TOKENS.borderHi : "var(--accent)",
-        color: "white",
-        border: "none",
-        borderRadius: 8,
-        padding: "6px 14px",
-        fontSize: 13,
-        fontWeight: 500,
-        cursor: disabled ? "not-allowed" : "pointer",
-        fontFamily: "inherit",
-        opacity: disabled ? 0.6 : 1,
-      }}
+      className={`border-0 rounded-lg px-3.5 py-1.5 text-[13px] font-medium text-white ${
+        disabled ? "bg-border-hi cursor-not-allowed opacity-60" : "bg-accent cursor-pointer"
+      }`}
     >
       {label}
     </button>
@@ -100,15 +49,7 @@ export function SheetActionButton({ label, onClick, disabled }) {
 
 export function FieldLabel({ children }) {
   return (
-    <div
-      style={{
-        fontSize: 11,
-        color: TOKENS.fgDim,
-        letterSpacing: "0.05em",
-        textTransform: "uppercase",
-        fontWeight: 500,
-      }}
-    >
+    <div className="text-[11px] text-fg-dim tracking-[0.05em] uppercase font-medium">
       {children}
     </div>
   )
