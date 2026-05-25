@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react"
-import { TOKENS } from "../../../lib/tokens"
 import { Icon } from "../../../lib/icons"
 import { formatIDR } from "../../../lib/format"
 import {
@@ -11,6 +10,8 @@ import {
 } from "../../../api"
 import AccountTile from "../../ui/AccountTile"
 import Toggle from "../../ui/Toggle"
+
+const FIELD_CLS = "bg-bg border border-border rounded-md py-2 px-2.5 text-fg text-[13px] outline-none"
 
 function RuleRow({ rule, onChange, onDelete }) {
   const [busy, setBusy] = useState(false)
@@ -36,49 +37,22 @@ function RuleRow({ rule, onChange, onDelete }) {
     }
   }
   return (
-    <div
-      style={{
-        display: "flex",
-        alignItems: "center",
-        gap: 10,
-        padding: 12,
-        background: TOKENS.card,
-        border: `1px solid ${TOKENS.border}`,
-        borderRadius: 10,
-        opacity: busy ? 0.6 : 1,
-      }}
-    >
+    <div className={`flex items-center gap-2.5 p-3 bg-card border border-border rounded-[10px] ${busy ? "opacity-60" : ""}`}>
       <AccountTile id={rule.category} size={28} />
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ fontSize: 13, color: TOKENS.fg, fontWeight: 500 }}>
-          {rule.name}
-        </div>
-        <div style={{ fontSize: 11, color: TOKENS.fgDim, marginTop: 2 }}>
+      <div className="flex-1 min-w-0">
+        <div className="text-[13px] text-fg font-medium">{rule.name}</div>
+        <div className="text-[11px] text-fg-dim mt-0.5">
           Day {rule.day_of_month} · {rule.type === "income" ? "Income" : "Expense"}
         </div>
       </div>
-      <span
-        style={{
-          fontSize: 13,
-          color: TOKENS.fg,
-          fontVariantNumeric: "tabular-nums",
-        }}
-      >
-        {formatIDR(rule.amount)}
-      </span>
+      <span className="text-[13px] text-fg tabular-nums">{formatIDR(rule.amount)}</span>
       <Toggle on={rule.enabled === 1} onClick={toggle} />
       <button
         onClick={remove}
         disabled={busy}
-        style={{
-          background: "transparent",
-          border: "none",
-          padding: 4,
-          cursor: busy ? "default" : "pointer",
-          display: "inline-flex",
-        }}
+        className={`bg-transparent border-0 p-1 inline-flex ${busy ? "cursor-default" : "cursor-pointer"}`}
       >
-        <Icon.Trash size={14} color={TOKENS.fgDim} />
+        <Icon.Trash size={14} color="#5a6071" />
       </button>
     </div>
   )
@@ -123,42 +97,21 @@ function NewRuleForm({ accounts, onCreated, onCancel }) {
     }
   }
 
-  const field = {
-    background: TOKENS.bg,
-    border: `1px solid ${TOKENS.border}`,
-    borderRadius: 6,
-    padding: "8px 10px",
-    color: TOKENS.fg,
-    fontSize: 13,
-    outline: "none",
-    fontFamily: "inherit",
-  }
-
   return (
-    <div
-      style={{
-        padding: 12,
-        background: TOKENS.card,
-        border: `1px solid ${TOKENS.border}`,
-        borderRadius: 10,
-        display: "flex",
-        flexDirection: "column",
-        gap: 8,
-      }}
-    >
+    <div className="p-3 bg-card border border-border rounded-[10px] flex flex-col gap-2">
       <input
         placeholder="Name (e.g. Rent)"
         value={name}
         onChange={(e) => setName(e.target.value)}
-        style={field}
+        className={`${FIELD_CLS} w-full`}
       />
-      <div style={{ display: "flex", gap: 8 }}>
+      <div className="flex gap-2">
         <input
           placeholder="Amount"
           inputMode="numeric"
           value={amount.replace(/\B(?=(\d{3})+(?!\d))/g, ".")}
           onChange={(e) => setAmount(e.target.value.replace(/\D/g, ""))}
-          style={{ ...field, flex: 1 }}
+          className={`${FIELD_CLS} flex-1`}
         />
         <input
           type="number"
@@ -166,10 +119,10 @@ function NewRuleForm({ accounts, onCreated, onCancel }) {
           max={31}
           value={day}
           onChange={(e) => setDay(e.target.value)}
-          style={{ ...field, width: 80 }}
+          className={`${FIELD_CLS} w-[80px]`}
         />
       </div>
-      <div style={{ display: "flex", gap: 8 }}>
+      <div className="flex gap-2">
         <select
           value={type}
           onChange={(e) => {
@@ -179,7 +132,7 @@ function NewRuleForm({ accounts, onCreated, onCancel }) {
             )
             if (first) setCategory(first.slug)
           }}
-          style={{ ...field, flex: 1 }}
+          className={`${FIELD_CLS} flex-1`}
         >
           <option value="expense">Expense</option>
           <option value="income">Income</option>
@@ -187,7 +140,7 @@ function NewRuleForm({ accounts, onCreated, onCancel }) {
         <select
           value={category}
           onChange={(e) => setCategory(e.target.value)}
-          style={{ ...field, flex: 2 }}
+          className={`${FIELD_CLS} flex-[2]`}
         >
           {opts.map((a) => (
             <option key={a.slug} value={a.slug}>
@@ -196,39 +149,18 @@ function NewRuleForm({ accounts, onCreated, onCancel }) {
           ))}
         </select>
       </div>
-      {error && (
-        <div style={{ fontSize: 11, color: TOKENS.red }}>{error}</div>
-      )}
-      <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
+      {error && <div className="text-[11px] text-red">{error}</div>}
+      <div className="flex gap-2 justify-end">
         <button
           onClick={onCancel}
-          style={{
-            background: "transparent",
-            border: `1px solid ${TOKENS.border}`,
-            color: TOKENS.fgMuted,
-            borderRadius: 8,
-            padding: "6px 14px",
-            fontSize: 12.5,
-            cursor: "pointer",
-            fontFamily: "inherit",
-          }}
+          className="bg-transparent border border-border text-fg-muted rounded-lg py-1.5 px-3.5 text-[12.5px] cursor-pointer"
         >
           Cancel
         </button>
         <button
           onClick={submit}
           disabled={!valid || busy}
-          style={{
-            background: !valid || busy ? TOKENS.borderHi : "var(--accent)",
-            color: "white",
-            border: "none",
-            borderRadius: 8,
-            padding: "6px 14px",
-            fontSize: 12.5,
-            cursor: !valid || busy ? "not-allowed" : "pointer",
-            fontFamily: "inherit",
-            fontWeight: 500,
-          }}
+          className={`border-0 rounded-lg py-1.5 px-3.5 text-[12.5px] font-medium text-white ${!valid || busy ? "bg-border-hi cursor-not-allowed" : "bg-accent cursor-pointer"}`}
         >
           {busy ? "Creating…" : "Create"}
         </button>
@@ -261,56 +193,26 @@ export default function RecurringTab({ accounts }) {
   }
 
   if (rules == null) {
-    return (
-      <div style={{ fontSize: 12, color: TOKENS.fgDim, padding: 12 }}>
-        Loading rules…
-      </div>
-    )
+    return <div className="text-[12px] text-fg-dim p-3">Loading rules…</div>
   }
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-      <div
-        style={{
-          padding: "10px 12px",
-          background: TOKENS.card,
-          border: `1px solid ${TOKENS.border}`,
-          borderRadius: 10,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          gap: 12,
-        }}
-      >
-        <div
-          style={{ fontSize: 12, color: TOKENS.fgMuted, lineHeight: 1.4 }}
-        >
+    <div className="flex flex-col gap-3">
+      <div className="py-2.5 px-3 bg-card border border-border rounded-[10px] flex items-center justify-between gap-3">
+        <div className="text-[12px] text-fg-muted leading-[1.4]">
           Apply due rules now (idempotent for this month).
         </div>
         <button
           onClick={runNow}
           disabled={running}
-          style={{
-            background: "var(--accent-soft)",
-            color: "var(--accent)",
-            border: "none",
-            borderRadius: 8,
-            padding: "6px 12px",
-            fontSize: 12,
-            fontWeight: 500,
-            cursor: running ? "not-allowed" : "pointer",
-            fontFamily: "inherit",
-            opacity: running ? 0.6 : 1,
-          }}
+          className={`bg-accent-soft text-accent border-0 rounded-lg py-1.5 px-3 text-[12px] font-medium ${running ? "cursor-not-allowed opacity-60" : "cursor-pointer"}`}
         >
           {running ? "Running…" : "Run now"}
         </button>
       </div>
 
       {error && (
-        <div style={{ fontSize: 12, color: TOKENS.red, padding: 8 }}>
-          {error}
-        </div>
+        <div className="text-[12px] text-red p-2">{error}</div>
       )}
 
       {rules.map((r) => (
@@ -336,16 +238,7 @@ export default function RecurringTab({ accounts }) {
       ) : (
         <button
           onClick={() => setAdding(true)}
-          style={{
-            background: "transparent",
-            border: `1px dashed ${TOKENS.border}`,
-            borderRadius: 10,
-            padding: 12,
-            color: TOKENS.fgMuted,
-            fontSize: 13,
-            cursor: "pointer",
-            fontFamily: "inherit",
-          }}
+          className="bg-transparent border border-dashed border-border rounded-[10px] p-3 text-fg-muted text-[13px] cursor-pointer w-full"
         >
           + New rule
         </button>

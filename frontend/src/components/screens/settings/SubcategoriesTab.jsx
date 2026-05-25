@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react"
-import { TOKENS } from "../../../lib/tokens"
 import { Icon } from "../../../lib/icons"
 import { patchAccount } from "../../../api"
 
@@ -38,54 +37,22 @@ function AccountGroup({ account, onChange }) {
 
   return (
     <div>
-      <div
-        style={{
-          fontSize: 12.5,
-          color: TOKENS.fg,
-          fontWeight: 500,
-          marginBottom: 8,
-        }}
-      >
+      <div className="text-[12.5px] text-fg font-medium mb-2">
         {account.display_name}
       </div>
-      <div
-        style={{
-          display: "flex",
-          flexWrap: "wrap",
-          gap: 6,
-          opacity: busy ? 0.6 : 1,
-        }}
-      >
+      <div className={`flex flex-wrap gap-1.5 ${busy ? "opacity-60" : ""}`}>
         {items.map((it) => (
           <span
             key={it}
-            style={{
-              fontSize: 11.5,
-              padding: "5px 10px",
-              borderRadius: 6,
-              background: TOKENS.card,
-              border: `1px solid ${TOKENS.border}`,
-              color: TOKENS.fg,
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 6,
-              textTransform: "capitalize",
-            }}
+            className="text-[11.5px] py-[5px] px-2.5 rounded-md bg-card border border-border text-fg inline-flex items-center gap-1.5 capitalize"
           >
             {it}
             <button
               onClick={() => removeItem(it)}
               disabled={busy}
-              style={{
-                background: "transparent",
-                border: "none",
-                cursor: busy ? "default" : "pointer",
-                padding: 0,
-                display: "inline-flex",
-                alignItems: "center",
-              }}
+              className={`bg-transparent border-0 p-0 inline-flex items-center ${busy ? "cursor-default" : "cursor-pointer"}`}
             >
-              <Icon.X size={11} color={TOKENS.fgDim} />
+              <Icon.X size={11} color="#5a6071" />
             </button>
           </span>
         ))}
@@ -95,23 +62,11 @@ function AccountGroup({ account, onChange }) {
           onKeyDown={(e) => e.key === "Enter" && addItem()}
           onBlur={addItem}
           placeholder="+ add"
-          style={{
-            fontSize: 11.5,
-            padding: "5px 10px",
-            borderRadius: 6,
-            border: `1px dashed ${TOKENS.border}`,
-            color: TOKENS.fg,
-            background: "transparent",
-            outline: "none",
-            fontFamily: "inherit",
-            width: 80,
-          }}
+          className="text-[11.5px] py-[5px] px-2.5 rounded-md border border-dashed border-border text-fg bg-transparent outline-none w-[80px]"
         />
       </div>
       {error && (
-        <div style={{ fontSize: 11, color: TOKENS.red, marginTop: 6 }}>
-          {error}
-        </div>
+        <div className="text-[11px] text-red mt-1.5">{error}</div>
       )}
     </div>
   )
@@ -121,7 +76,7 @@ export default function SubcategoriesTab({ accounts, onAccountChange }) {
   if (!accounts) return null
   const visible = accounts.filter((a) => a.type === "expense")
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+    <div className="flex flex-col gap-4">
       {visible.map((a) => (
         <AccountGroup key={a.slug} account={a} onChange={onAccountChange} />
       ))}
