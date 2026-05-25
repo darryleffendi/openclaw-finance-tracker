@@ -84,7 +84,7 @@ export default function MobileDashboard({
     }))
     .filter((d) => d.value > 0)
 
-  const spentToday = sumSpentToday(transactions)
+  const spentToday = sumSpentToday(transactions, accounts)
 
   return (
     <div className="bg-bg text-fg min-h-full flex flex-col relative">

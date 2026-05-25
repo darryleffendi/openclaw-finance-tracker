@@ -59,15 +59,25 @@ export function useDashboardData(period = "this-month", month) {
 }
 
 // Quick helper: total of today's expense transactions (for HeroRing's spentToday).
-export function sumSpentToday(transactions) {
+// When accounts is provided, only sums transactions whose category belongs to an
+// account with daily_budget_enabled.
+export function sumSpentToday(transactions, accounts) {
   if (!transactions) return 0
   const today = ymdToday()
+  const dailySlugs = accounts
+    ? new Set(
+        accounts
+          .filter((a) => a.daily_budget_enabled)
+          .map((a) => a.slug)
+      )
+    : null
   return transactions
     .filter(
       (t) =>
         t.date === today &&
         t.type === "expense" &&
-        t.note !== "auto-distribution from salary"
+        t.note !== "auto-distribution from salary" &&
+        (!dailySlugs || dailySlugs.has(t.category))
     )
     .reduce((s, t) => s + t.amount, 0)
 }

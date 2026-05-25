@@ -102,7 +102,7 @@ export default function DesktopDashboard({
     }))
     .filter((d) => d.value > 0)
 
-  const spentToday = sumSpentToday(transactions)
+  const spentToday = sumSpentToday(transactions, accounts)
 
   const totalExpense = expenseAccounts.reduce(
     (s, a) => s + spentForAccount(a, bucketMap[a.slug]),
