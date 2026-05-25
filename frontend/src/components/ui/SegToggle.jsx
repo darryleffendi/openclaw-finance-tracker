@@ -1,32 +1,13 @@
-import { TOKENS } from "../../lib/tokens"
-
 export default function SegToggle({ value, onChange, options }) {
   return (
-    <div
-      style={{
-        display: "flex",
-        background: TOKENS.bg,
-        borderRadius: 10,
-        padding: 3,
-        border: `1px solid ${TOKENS.border}`,
-      }}
-    >
+    <div className="flex bg-bg rounded-[10px] p-[3px] border border-border">
       {options.map((o) => (
         <button
           key={o.value}
           onClick={() => onChange(o.value)}
-          style={{
-            flex: 1,
-            padding: "8px 0",
-            border: "none",
-            borderRadius: 7,
-            background: value === o.value ? TOKENS.card : "transparent",
-            color: value === o.value ? TOKENS.fg : TOKENS.fgMuted,
-            fontSize: 13,
-            fontWeight: 500,
-            cursor: "pointer",
-            fontFamily: "inherit",
-          }}
+          className={`flex-1 py-2 border-0 rounded-[7px] text-[13px] font-medium cursor-pointer ${
+            value === o.value ? "bg-card text-fg" : "bg-transparent text-fg-muted"
+          }`}
         >
           {o.label}
         </button>

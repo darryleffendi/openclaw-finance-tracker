@@ -1,5 +1,3 @@
-import { TOKENS } from "../../lib/tokens"
-
 // Concentric rings: outer = month progress (dim), inner = budget burned
 // (status-colored). Center stays empty for the parent to render the label.
 export default function AllowanceRing({
@@ -22,19 +20,19 @@ export default function AllowanceRing({
       width={size}
       height={size}
       viewBox={`0 0 ${size} ${size}`}
-      style={{ transform: "rotate(-90deg)" }}
+      className="-rotate-90"
     >
       <circle cx={size / 2} cy={size / 2} r={r1} fill="none"
-        stroke={TOKENS.border} strokeWidth={stroke} />
+        stroke="#222836" strokeWidth={stroke} />
       <circle cx={size / 2} cy={size / 2} r={r1} fill="none"
-        stroke={TOKENS.fgDim} strokeWidth={stroke}
+        stroke="#5a6071" strokeWidth={stroke}
         strokeDasharray={`${monthPct * c1} ${c1}`} strokeLinecap="round" />
       <circle cx={size / 2} cy={size / 2} r={r2} fill="none"
-        stroke={TOKENS.border} strokeWidth={stroke} />
+        stroke="#222836" strokeWidth={stroke} />
       <circle cx={size / 2} cy={size / 2} r={r2} fill="none"
         stroke={color} strokeWidth={stroke}
         strokeDasharray={`${spent * c2} ${c2}`} strokeLinecap="round"
-        style={{ transition: "stroke-dasharray .5s" }} />
+        className="[transition:stroke-dasharray_.5s]" />
     </svg>
   )
 }

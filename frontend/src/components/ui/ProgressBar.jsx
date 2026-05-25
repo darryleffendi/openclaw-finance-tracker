@@ -1,4 +1,4 @@
-import { TOKENS, statusFor } from "../../lib/tokens"
+import { statusFor } from "../../lib/tokens"
 
 // Variant C — track + fill + ideal-pace tick (day-of-month position).
 export default function ProgressBar({
@@ -18,37 +18,21 @@ export default function ProgressBar({
     dayOfMonth && daysInMonth ? Math.min(1, dayOfMonth / daysInMonth) : null
 
   return (
-    <div style={{ position: "relative", height: height + 4 }}>
+    <div className="relative" style={{ height: height + 4 }}>
       <div
-        style={{
-          position: "absolute",
-          left: 0,
-          right: 0,
-          top: 2,
-          height,
-          background: TOKENS.border,
-          borderRadius: height / 2,
-          overflow: "hidden",
-        }}
+        className="absolute left-0 right-0 top-0.5 bg-border overflow-hidden"
+        style={{ height, borderRadius: height / 2 }}
       >
         <div
-          style={{
-            width: `${pct * 100}%`,
-            height: "100%",
-            background: color,
-            borderRadius: height / 2,
-            transition: "width .4s",
-          }}
+          className="h-full transition-[width] duration-400"
+          style={{ width: `${pct * 100}%`, background: color, borderRadius: height / 2 }}
         />
         {over && (
           <div
+            className="absolute top-0 h-full bg-red"
             style={{
-              position: "absolute",
               left: "100%",
-              top: 0,
-              height: "100%",
               width: `${overPct * 100}%`,
-              background: TOKENS.red,
               transform: "translateX(-2px)",
             }}
           />
@@ -56,15 +40,8 @@ export default function ProgressBar({
       </div>
       {idealPct != null && (
         <div
-          style={{
-            position: "absolute",
-            left: `${idealPct * 100}%`,
-            top: 0,
-            width: 2,
-            height: height + 4,
-            background: "rgba(255,255,255,.35)",
-            borderRadius: 1,
-          }}
+          className="absolute top-0 w-0.5 bg-white/35 rounded-[1px]"
+          style={{ left: `${idealPct * 100}%`, height: height + 4 }}
         />
       )}
     </div>
