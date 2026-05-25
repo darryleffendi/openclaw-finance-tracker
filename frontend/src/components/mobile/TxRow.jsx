@@ -19,67 +19,30 @@ export default function TxRow({ tx, onTap }) {
   return (
     <div
       onClick={onTap}
-      style={{
-        display: "flex",
-        alignItems: "center",
-        gap: 12,
-        padding: "12px 4px",
-        borderBottom: `1px solid ${TOKENS.border}`,
-        cursor: onTap ? "pointer" : "default",
-      }}
+      className={`flex items-center gap-3 py-3 px-1 border-b border-border ${onTap ? "cursor-pointer" : "cursor-default"}`}
     >
       <AccountTile id={tx.category} size={32} />
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-1.5">
           <span
-            style={{
-              fontSize: 13.5,
-              color: TOKENS.fg,
-              fontWeight: 500,
-              textTransform: tx.subcategory ? "capitalize" : "none",
-            }}
+            className={`text-[13.5px] text-fg font-medium ${tx.subcategory ? "capitalize" : ""}`}
           >
             {subOrDefault}
           </span>
-          {recurring && <Icon.Repeat size={11} color={TOKENS.fgDim} />}
+          {recurring && <Icon.Repeat size={11} color="#5a6071" />}
         </div>
-        <div
-          style={{
-            fontSize: 11.5,
-            color: TOKENS.fgMuted,
-            marginTop: 2,
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            whiteSpace: "nowrap",
-          }}
-        >
+        <div className="text-[11.5px] text-fg-muted mt-0.5 overflow-hidden text-ellipsis whitespace-nowrap">
           {meta}
           {distributed && (
-            <span
-              style={{
-                marginLeft: 6,
-                fontSize: 10.5,
-                padding: "1px 6px",
-                borderRadius: 4,
-                background: "var(--accent-soft)",
-                color: "var(--accent)",
-                fontWeight: 500,
-              }}
-            >
+            <span className="ml-1.5 text-[10.5px] py-px px-1.5 rounded bg-accent-soft text-accent font-medium">
               ↪ auto-distributed
             </span>
           )}
         </div>
       </div>
       <span
-        style={{
-          fontSize: 13.5,
-          fontWeight: 500,
-          color: isIncome ? TOKENS.income : TOKENS.fg,
-          fontVariantNumeric: "tabular-nums",
-          letterSpacing: "-0.01em",
-          whiteSpace: "nowrap",
-        }}
+        className="text-[13.5px] font-medium tabular-nums tracking-[-0.01em] whitespace-nowrap"
+        style={{ color: isIncome ? TOKENS.income : TOKENS.fg }}
       >
         {isIncome
           ? formatIDR(signedAmount, { signed: true })

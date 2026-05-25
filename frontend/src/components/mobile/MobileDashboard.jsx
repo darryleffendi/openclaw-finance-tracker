@@ -1,5 +1,4 @@
 import { useState, useMemo } from "react"
-import { TOKENS } from "../../lib/tokens"
 import { Icon } from "../../lib/icons"
 import { formatIDRShort } from "../../lib/format"
 import {
@@ -30,16 +29,7 @@ const DONUT_COLORS = [
 
 function SectionLabel({ children }) {
   return (
-    <div
-      style={{
-        fontSize: 11,
-        color: TOKENS.fgDim,
-        textTransform: "uppercase",
-        letterSpacing: "0.08em",
-        fontWeight: 600,
-        marginTop: 4,
-      }}
-    >
+    <div className="text-[11px] text-fg-dim uppercase tracking-[0.08em] font-semibold mt-1">
       {children}
     </div>
   )
@@ -62,16 +52,7 @@ export default function MobileDashboard({
 
   if (!accounts) {
     return (
-      <div
-        style={{
-          background: TOKENS.bg,
-          color: TOKENS.fgMuted,
-          minHeight: "100%",
-          padding: 32,
-          textAlign: "center",
-          fontSize: 13,
-        }}
-      >
+      <div className="bg-bg text-fg-muted min-h-full p-8 text-center text-[13px]">
         Loading…
       </div>
     )
@@ -82,7 +63,6 @@ export default function MobileDashboard({
     (a) => a.type !== "expense" && a.type !== "income"
   )
 
-  // Today's day-of-month and total days, for the per-card ideal-pace tick.
   const ymd = today?.date || ""
   const [, , dStr] = ymd.split("-")
   const day = Number(dStr)
@@ -107,35 +87,19 @@ export default function MobileDashboard({
   const spentToday = sumSpentToday(transactions)
 
   return (
-    <div
-      style={{
-        background: TOKENS.bg,
-        color: TOKENS.fg,
-        minHeight: "100%",
-        display: "flex",
-        flexDirection: "column",
-        position: "relative",
-      }}
-    >
+    <div className="bg-bg text-fg min-h-full flex flex-col relative">
       <MobileHeader
         periodLabel={periodLabel}
         onPeriodTap={onPeriodTap}
         onSettings={onSettings}
         onAdd={onAdd}
       />
-      <div
-        style={{
-          padding: "16px 16px 90px",
-          display: "flex",
-          flexDirection: "column",
-          gap: 16,
-        }}
-      >
+      <div className="px-4 pt-4 pb-[90px] flex flex-col gap-4">
         <HeroRing today={today} spentToday={spentToday} />
         <SummaryStrip summary={summary} />
 
         <SectionLabel>Accounts</SectionLabel>
-        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+        <div className="flex flex-col gap-2.5">
           {expenseAccounts.map((a) => {
             const spent = spentForAccount(a, bucketMap[a.slug])
             const sparkValues = buildSparkline(transactions, a.slug)
@@ -167,77 +131,27 @@ export default function MobileDashboard({
 
         <button
           onClick={() => setChartsOpen(!chartsOpen)}
-          style={{
-            background: "transparent",
-            border: `1px solid ${TOKENS.border}`,
-            borderRadius: 10,
-            padding: "10px 14px",
-            cursor: "pointer",
-            color: TOKENS.fgMuted,
-            fontSize: 13,
-            fontWeight: 500,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            fontFamily: "inherit",
-          }}
+          className="bg-transparent border border-border rounded-[10px] py-2.5 px-3.5 cursor-pointer text-fg-muted text-[13px] font-medium flex items-center justify-between"
         >
           <span>{chartsOpen ? "Hide" : "Show"} charts</span>
           {chartsOpen ? <Icon.ChevU size={16} /> : <Icon.ChevD size={16} />}
         </button>
         {chartsOpen && donut.length > 0 && (
           <Card padding={16}>
-            <div
-              style={{
-                fontSize: 11.5,
-                color: TOKENS.fgDim,
-                textTransform: "uppercase",
-                letterSpacing: "0.06em",
-                fontWeight: 600,
-                marginBottom: 12,
-              }}
-            >
+            <div className="text-[11.5px] text-fg-dim uppercase tracking-[0.06em] font-semibold mb-3">
               Spending by category
             </div>
-            <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+            <div className="flex items-center gap-4">
               <Donut data={donut} size={120} stroke={18} />
-              <div
-                style={{
-                  flex: 1,
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: 6,
-                }}
-              >
+              <div className="flex-1 flex flex-col gap-1.5">
                 {donut.slice(0, 5).map((d) => (
-                  <div
-                    key={d.name}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 6,
-                      fontSize: 11.5,
-                    }}
-                  >
+                  <div key={d.name} className="flex items-center gap-1.5 text-[11.5px]">
                     <span
-                      style={{
-                        width: 8,
-                        height: 8,
-                        borderRadius: 2,
-                        background: d.color,
-                      }}
+                      className="w-2 h-2 rounded-[2px] shrink-0"
+                      style={{ background: d.color }}
                     />
-                    <span style={{ flex: 1, color: TOKENS.fgMuted }}>
-                      {d.name}
-                    </span>
-                    <span
-                      style={{
-                        color: TOKENS.fg,
-                        fontVariantNumeric: "tabular-nums",
-                      }}
-                    >
-                      {formatIDRShort(d.value)}
-                    </span>
+                    <span className="flex-1 text-fg-muted">{d.name}</span>
+                    <span className="text-fg tabular-nums">{formatIDRShort(d.value)}</span>
                   </div>
                 ))}
               </div>
@@ -246,17 +160,7 @@ export default function MobileDashboard({
         )}
 
         <SectionLabel>Transactions</SectionLabel>
-        <div
-          style={{
-            display: "flex",
-            gap: 6,
-            overflowX: "auto",
-            paddingBottom: 4,
-            marginLeft: -16,
-            marginRight: -16,
-            padding: "0 16px 4px",
-          }}
-        >
+        <div className="flex gap-1.5 overflow-x-auto pb-1 -mx-4 px-4">
           {filters.map((f) => (
             <Chip key={f} active={filter === f} onClick={() => setFilter(f)}>
               {f === "all"
@@ -267,14 +171,7 @@ export default function MobileDashboard({
         </div>
         <div>
           {filteredTxs.length === 0 ? (
-            <div
-              style={{
-                fontSize: 12,
-                color: TOKENS.fgDim,
-                padding: 24,
-                textAlign: "center",
-              }}
-            >
+            <div className="text-[12px] text-fg-dim p-6 text-center">
               No transactions in this period.
             </div>
           ) : (
@@ -287,23 +184,7 @@ export default function MobileDashboard({
 
       <button
         onClick={onAdd}
-        style={{
-          position: "fixed",
-          right: 18,
-          bottom: 24,
-          width: 52,
-          height: 52,
-          borderRadius: 26,
-          border: "none",
-          background: "var(--accent)",
-          color: "white",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          boxShadow: "0 8px 20px var(--accent-glow)",
-          cursor: "pointer",
-          zIndex: 10,
-        }}
+        className="fixed right-[18px] bottom-6 w-[52px] h-[52px] rounded-[26px] border-0 bg-accent text-white flex items-center justify-center shadow-[0_8px_20px_var(--accent-glow)] cursor-pointer z-10"
       >
         <Icon.Plus size={22} />
       </button>

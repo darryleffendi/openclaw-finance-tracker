@@ -56,42 +56,22 @@ export default function AccountCard({
     <Card
       padding={14}
       onClick={onTap}
-      style={{
-        cursor: onTap ? "pointer" : "default",
-        background: over ? "rgba(248,113,113,0.05)" : TOKENS.card,
-        borderColor: over ? "rgba(248,113,113,0.25)" : TOKENS.border,
-      }}
+      className={onTap ? "cursor-pointer" : "cursor-default"}
+      style={over ? {
+        background: "rgba(248,113,113,0.05)",
+        borderColor: "rgba(248,113,113,0.25)",
+      } : undefined}
     >
-      <div
-        style={{
-          display: "flex",
-          alignItems: "flex-start",
-          gap: 12,
-          marginBottom: 12,
-        }}
-      >
+      <div className="flex items-start gap-3 mb-3">
         <AccountTile id={account.slug} size={36} />
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-            <span
-              style={{
-                fontSize: 13,
-                fontWeight: 500,
-                color: TOKENS.fg,
-              }}
-            >
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-1.5">
+            <span className="text-[13px] font-medium text-fg">
               {account.display_name}
             </span>
-            {recurring && <Icon.Repeat size={11} color={TOKENS.fgDim} />}
+            {recurring && <Icon.Repeat size={11} color="#5a6071" />}
           </div>
-          <div
-            style={{
-              fontSize: 11,
-              color: TOKENS.fgDim,
-              marginTop: 2,
-              letterSpacing: "0.02em",
-            }}
-          >
+          <div className="text-[11px] text-fg-dim mt-0.5 tracking-[0.02em]">
             {accountTypeLabel(account.type)}
             {account.subcategories && account.subcategories.length > 0 &&
               ` · ${account.subcategories.length} subcategories`}
@@ -105,24 +85,12 @@ export default function AccountCard({
         )}
       </div>
       <div
-        style={{
-          fontSize: 19,
-          fontWeight: 500,
-          color: bigColor,
-          fontVariantNumeric: "tabular-nums",
-          letterSpacing: "-0.02em",
-          marginBottom: 4,
-        }}
+        className="text-[19px] font-medium tabular-nums tracking-[-0.02em] mb-1"
+        style={{ color: bigColor }}
       >
         {bigNumber}
       </div>
-      <div
-        style={{
-          fontSize: 11.5,
-          color: TOKENS.fgMuted,
-          marginBottom: 10,
-        }}
-      >
+      <div className="text-[11.5px] text-fg-muted mb-2.5">
         {bigLabel}
       </div>
       {!isIncome && (

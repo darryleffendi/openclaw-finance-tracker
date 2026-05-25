@@ -3,27 +3,15 @@ import { formatIDR, formatLongDate, ymdToday } from "../../lib/format"
 import Card from "../ui/Card"
 import AllowanceRing from "../ui/AllowanceRing"
 
-function Stat({ label, value, color = TOKENS.fg }) {
+function Stat({ label, value, color }) {
   return (
     <div>
-      <div
-        style={{
-          fontSize: 10.5,
-          color: TOKENS.fgDim,
-          textTransform: "uppercase",
-          letterSpacing: "0.06em",
-        }}
-      >
+      <div className="text-[10.5px] text-fg-dim uppercase tracking-[0.06em]">
         {label}
       </div>
       <div
-        style={{
-          fontSize: 14,
-          fontWeight: 500,
-          color,
-          fontVariantNumeric: "tabular-nums",
-          marginTop: 2,
-        }}
+        className="text-[14px] font-medium tabular-nums mt-0.5"
+        style={{ color }}
       >
         {value}
       </div>
@@ -44,34 +32,17 @@ export default function HeroRing({ today, spentToday }) {
       ? TOKENS.orange
       : "var(--accent)"
 
-  // Derive day-of-month from today.date or current date.
   const [, , dStr] = (today.date || ymdToday()).split("-")
   const day = Number(dStr)
   const totalDays = day + today.days_remaining - 1
 
   return (
     <Card padding={20} style={{ borderColor: TOKENS.borderHi }}>
-      <div
-        style={{
-          fontSize: 11.5,
-          color: TOKENS.fgDim,
-          textTransform: "uppercase",
-          letterSpacing: "0.08em",
-          fontWeight: 600,
-          marginBottom: 14,
-        }}
-      >
+      <div className="text-[11.5px] text-fg-dim uppercase tracking-[0.08em] font-semibold mb-[14px]">
         Today · {formatLongDate(today.date || ymdToday())}
       </div>
-      <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
-        <div
-          style={{
-            position: "relative",
-            width: 132,
-            height: 132,
-            flexShrink: 0,
-          }}
-        >
+      <div className="flex items-center gap-[18px]">
+        <div className="relative w-[132px] h-[132px] shrink-0">
           <AllowanceRing
             size={132}
             dayOfMonth={day}
@@ -79,62 +50,27 @@ export default function HeroRing({ today, spentToday }) {
             spentPct={spentPct}
             color={color}
           />
-          <div
-            style={{
-              position: "absolute",
-              inset: 0,
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <div
-              style={{
-                fontSize: 10,
-                color: TOKENS.fgDim,
-                letterSpacing: "0.05em",
-                textTransform: "uppercase",
-              }}
-            >
+          <div className="absolute inset-0 flex flex-col items-center justify-center">
+            <div className="text-[10px] text-fg-dim tracking-[0.05em] uppercase">
               {over ? "Over by" : "Left"}
             </div>
             <div
-              style={{
-                fontSize: 18,
-                fontWeight: 600,
-                color: over ? TOKENS.red : TOKENS.fg,
-                fontVariantNumeric: "tabular-nums",
-                marginTop: 2,
-              }}
+              className="text-[18px] font-semibold tabular-nums mt-0.5"
+              style={{ color: over ? TOKENS.red : TOKENS.fg }}
             >
               {formatIDR(Math.abs(remaining))}
             </div>
           </div>
         </div>
-        <div
-          style={{
-            flex: 1,
-            display: "flex",
-            flexDirection: "column",
-            gap: 10,
-          }}
-        >
-          <Stat label="Allowance" value={formatIDR(allowance)} />
+        <div className="flex-1 flex flex-col gap-2.5">
+          <Stat label="Allowance" value={formatIDR(allowance)} color={TOKENS.fg} />
           <Stat
             label="Spent today"
             value={formatIDR(spentToday)}
             color={over ? TOKENS.red : TOKENS.fg}
           />
-          <div style={{ height: 1, background: TOKENS.border }} />
-          <div
-            style={{
-              fontSize: 10,
-              color: TOKENS.fgDim,
-              letterSpacing: "0.05em",
-              textTransform: "uppercase",
-            }}
-          >
+          <div className="h-px bg-border" />
+          <div className="text-[10px] text-fg-dim tracking-[0.05em] uppercase">
             Day {day} of {totalDays}
           </div>
         </div>

@@ -3,27 +3,13 @@ import { formatIDRShort } from "../../lib/format"
 
 function SummaryItem({ label, value, color }) {
   return (
-    <div style={{ padding: "4px 0" }}>
-      <div
-        style={{
-          fontSize: 10.5,
-          color: TOKENS.fgDim,
-          textTransform: "uppercase",
-          letterSpacing: "0.06em",
-          fontWeight: 500,
-        }}
-      >
+    <div className="py-1">
+      <div className="text-[10.5px] text-fg-dim uppercase tracking-[0.06em] font-medium">
         {label}
       </div>
       <div
-        style={{
-          fontSize: 19,
-          fontWeight: 500,
-          color,
-          fontVariantNumeric: "tabular-nums",
-          letterSpacing: "-0.02em",
-          marginTop: 4,
-        }}
+        className="text-[19px] font-medium tabular-nums tracking-[-0.02em] mt-1"
+        style={{ color }}
       >
         Rp {value}
       </div>
@@ -33,16 +19,10 @@ function SummaryItem({ label, value, color }) {
 
 export default function SummaryStrip({ summary }) {
   if (!summary)
-    return <div style={{ height: 56, padding: "0 4px" }} />
+    return <div className="h-14 px-1" />
   const { income = 0, expense = 0, balance = 0 } = summary
   return (
-    <div
-      style={{
-        display: "grid",
-        gridTemplateColumns: "1fr 1fr 1fr",
-        padding: "0 4px",
-      }}
-    >
+    <div className="grid grid-cols-3 px-1">
       <SummaryItem
         label="Income"
         value={formatIDRShort(income)}
