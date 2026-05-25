@@ -1,4 +1,3 @@
-import { TOKENS } from "../../lib/tokens"
 import SheetWrap from "./SheetWrap"
 
 const PRESETS = [
@@ -12,18 +11,9 @@ const PRESETS = [
 export default function PeriodPicker({ period, onPick, onClose }) {
   return (
     <SheetWrap onClose={onClose} maxHeight="60%">
-      <div style={{ padding: "0 20px 4px" }}>
-        <div
-          style={{
-            fontSize: 14,
-            fontWeight: 500,
-            marginBottom: 14,
-            textAlign: "center",
-          }}
-        >
-          Period
-        </div>
-        <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+      <div className="px-5 pb-1">
+        <div className="text-[14px] font-medium mb-[14px] text-center">Period</div>
+        <div className="flex flex-col gap-1.5">
           {PRESETS.map((p) => {
             const active = p.value === period
             return (
@@ -33,48 +23,20 @@ export default function PeriodPicker({ period, onPick, onClose }) {
                   onPick(p.value)
                   onClose()
                 }}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  padding: "14px 16px",
-                  borderRadius: 12,
-                  background: active ? "var(--accent-soft)" : TOKENS.card,
-                  border: `1px solid ${active ? "var(--accent-glow)" : TOKENS.border}`,
-                  cursor: "pointer",
-                  fontFamily: "inherit",
-                  textAlign: "left",
-                }}
+                className={`flex items-center justify-between py-3.5 px-4 rounded-xl cursor-pointer text-left border ${
+                  active
+                    ? "bg-accent-soft border-accent-glow"
+                    : "bg-card border-border"
+                }`}
               >
                 <div>
-                  <div
-                    style={{
-                      fontSize: 14,
-                      fontWeight: 500,
-                      color: active ? "var(--accent)" : TOKENS.fg,
-                    }}
-                  >
+                  <div className={`text-[14px] font-medium ${active ? "text-accent" : "text-fg"}`}>
                     {p.label}
                   </div>
-                  <div
-                    style={{
-                      fontSize: 11.5,
-                      color: TOKENS.fgDim,
-                      marginTop: 2,
-                    }}
-                  >
-                    {p.hint}
-                  </div>
+                  <div className="text-[11.5px] text-fg-dim mt-0.5">{p.hint}</div>
                 </div>
                 {active && (
-                  <span
-                    style={{
-                      width: 8,
-                      height: 8,
-                      borderRadius: 4,
-                      background: "var(--accent)",
-                    }}
-                  />
+                  <span className="w-2 h-2 rounded-full bg-accent shrink-0" />
                 )}
               </button>
             )

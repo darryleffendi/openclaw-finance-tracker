@@ -1,5 +1,4 @@
 import { useMemo, useState } from "react"
-import { TOKENS } from "../../lib/tokens"
 import { Icon } from "../../lib/icons"
 import { formatIDR, ymdToday } from "../../lib/format"
 import { createTransaction } from "../../api"
@@ -14,37 +13,14 @@ function PickerRow({ label, value, onTap, disabled }) {
   return (
     <button
       onClick={disabled ? undefined : onTap}
-      style={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        padding: "12px 0",
-        borderBottom: `1px solid ${TOKENS.border}`,
-        background: "transparent",
-        border: "none",
-        borderTop: "none",
-        borderLeft: "none",
-        borderRight: "none",
-        cursor: disabled ? "default" : "pointer",
-        width: "100%",
-        textAlign: "left",
-        fontFamily: "inherit",
-        color: "inherit",
-        opacity: disabled ? 0.5 : 1,
-      }}
+      className={`flex items-center justify-between py-3 border-b border-border bg-transparent border-t-0 border-l-0 border-r-0 w-full text-left text-inherit ${disabled ? "opacity-50 cursor-default" : "cursor-pointer"}`}
     >
-      <span style={{ fontSize: 12.5, color: TOKENS.fgDim }}>{label}</span>
-      <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-        <span
-          style={{
-            fontSize: 13.5,
-            color: TOKENS.fg,
-            textTransform: "capitalize",
-          }}
-        >
+      <span className="text-[12.5px] text-fg-dim">{label}</span>
+      <div className="flex items-center gap-1.5">
+        <span className="text-[13.5px] text-fg capitalize">
           {value || "—"}
         </span>
-        {!disabled && <Icon.ChevR size={14} color={TOKENS.fgDim} />}
+        {!disabled && <Icon.ChevR size={14} color="#5a6071" />}
       </div>
     </button>
   )
@@ -54,39 +30,14 @@ function PopoverList({ options, onPick, onClose }) {
   return (
     <div
       onClick={onClose}
-      style={{
-        position: "absolute",
-        inset: 0,
-        background: "rgba(0,0,0,0.4)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        zIndex: 110,
-      }}
+      className="absolute inset-0 bg-black/40 flex items-center justify-center z-[110]"
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        style={{
-          background: TOKENS.card,
-          border: `1px solid ${TOKENS.border}`,
-          borderRadius: 12,
-          padding: 6,
-          maxHeight: 320,
-          overflowY: "auto",
-          minWidth: 220,
-        }}
+        className="bg-card border border-border rounded-xl p-1.5 max-h-[320px] overflow-y-auto min-w-[220px]"
       >
         {options.length === 0 && (
-          <div
-            style={{
-              padding: 12,
-              fontSize: 12,
-              color: TOKENS.fgDim,
-              textAlign: "center",
-            }}
-          >
-            (none)
-          </div>
+          <div className="p-3 text-[12px] text-fg-dim text-center">(none)</div>
         )}
         {options.map((o) => (
           <button
@@ -95,20 +46,7 @@ function PopoverList({ options, onPick, onClose }) {
               onPick(o.value)
               onClose()
             }}
-            style={{
-              display: "block",
-              width: "100%",
-              textAlign: "left",
-              background: "transparent",
-              border: "none",
-              padding: "10px 12px",
-              borderRadius: 8,
-              color: TOKENS.fg,
-              fontSize: 13,
-              cursor: "pointer",
-              fontFamily: "inherit",
-              textTransform: "capitalize",
-            }}
+            className="block w-full text-left bg-transparent border-0 py-2.5 px-3 rounded-lg text-fg text-[13px] cursor-pointer capitalize"
           >
             {o.label}
           </button>
@@ -187,14 +125,7 @@ export default function AddTransactionSheet({ accounts, onClose, onAdded }) {
         }
       />
 
-      <div
-        style={{
-          padding: "0 20px",
-          display: "flex",
-          flexDirection: "column",
-          gap: 18,
-        }}
-      >
+      <div className="px-5 flex flex-col gap-[18px]">
         <SegToggle
           value={type}
           onChange={(v) => {
@@ -210,41 +141,15 @@ export default function AddTransactionSheet({ accounts, onClose, onAdded }) {
 
         <div>
           <FieldLabel>Amount</FieldLabel>
-          <div
-            style={{
-              display: "flex",
-              alignItems: "baseline",
-              gap: 8,
-              padding: "14px 0 12px",
-              borderBottom: `1px solid ${TOKENS.border}`,
-            }}
-          >
-            <span
-              style={{ fontSize: 22, color: TOKENS.fgMuted, fontWeight: 400 }}
-            >
-              Rp
-            </span>
+          <div className="flex items-baseline gap-2 py-3.5 pb-3 border-b border-border">
+            <span className="text-[22px] text-fg-muted font-normal">Rp</span>
             <input
               type="text"
               inputMode="numeric"
               placeholder="0"
               value={displayAmount}
-              onChange={(e) =>
-                setAmount(e.target.value.replace(/\D/g, ""))
-              }
-              style={{
-                flex: 1,
-                fontSize: 36,
-                fontWeight: 500,
-                letterSpacing: "-0.025em",
-                color: TOKENS.fg,
-                fontVariantNumeric: "tabular-nums",
-                background: "transparent",
-                border: "none",
-                outline: "none",
-                padding: 0,
-                fontFamily: "inherit",
-              }}
+              onChange={(e) => setAmount(e.target.value.replace(/\D/g, ""))}
+              className="flex-1 text-[36px] font-medium tracking-[-0.025em] text-fg tabular-nums bg-transparent border-0 outline-none p-0"
             />
           </div>
         </div>
@@ -266,18 +171,8 @@ export default function AddTransactionSheet({ accounts, onClose, onAdded }) {
             type="date"
             value={date}
             onChange={(e) => setDate(e.target.value)}
-            style={{
-              width: "100%",
-              background: "transparent",
-              border: "none",
-              borderBottom: `1px solid ${TOKENS.border}`,
-              color: TOKENS.fg,
-              fontSize: 14,
-              padding: "12px 0",
-              outline: "none",
-              fontFamily: "inherit",
-              colorScheme: "dark",
-            }}
+            className="w-full bg-transparent border-0 border-b border-border text-fg text-[14px] py-3 outline-none"
+            style={{ colorScheme: "dark" }}
           />
         </div>
         <div>
@@ -287,47 +182,18 @@ export default function AddTransactionSheet({ accounts, onClose, onAdded }) {
             placeholder="optional"
             value={note}
             onChange={(e) => setNote(e.target.value)}
-            style={{
-              width: "100%",
-              background: "transparent",
-              border: "none",
-              borderBottom: `1px solid ${TOKENS.border}`,
-              color: TOKENS.fg,
-              fontSize: 14,
-              padding: "12px 0",
-              outline: "none",
-              fontFamily: "inherit",
-            }}
+            className="w-full bg-transparent border-0 border-b border-border text-fg text-[14px] py-3 outline-none"
           />
         </div>
 
         {error && (
-          <div
-            style={{
-              fontSize: 12,
-              color: TOKENS.red,
-              padding: "8px 10px",
-              background: "rgba(248,113,113,0.08)",
-              borderRadius: 8,
-              border: "1px solid rgba(248,113,113,0.2)",
-            }}
-          >
+          <div className="text-[12px] text-red py-2 px-2.5 bg-[rgba(248,113,113,0.08)] rounded-lg border border-[rgba(248,113,113,0.2)]">
             {error}
           </div>
         )}
 
         {category === "salary" && type === "income" && (
-          <div
-            style={{
-              padding: "10px 12px",
-              background: "var(--accent-soft)",
-              border: "1px solid var(--accent-glow)",
-              borderRadius: 10,
-              fontSize: 12,
-              color: "var(--accent)",
-              lineHeight: 1.4,
-            }}
-          >
+          <div className="py-2.5 px-3 bg-accent-soft border border-accent-glow rounded-[10px] text-[12px] text-accent leading-[1.4]">
             Adding salary income will auto-distribute{" "}
             {formatIDR(numericAmount)} across expense and savings accounts.
           </div>
