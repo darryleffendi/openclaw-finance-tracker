@@ -28,6 +28,13 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+}
+
 .ab-scroll::-webkit-scrollbar {
   display: none;
 }
