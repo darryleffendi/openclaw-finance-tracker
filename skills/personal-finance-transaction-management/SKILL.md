@@ -6,6 +6,7 @@ description: Manage individual finance transactions one at a time. Use this skil
 # Personal Finance Transaction Management
 
 ## Files
+
 - CLI: `~/codespace/personal-finance-tracker/cli.py`
 - Backend code: `~/codespace/personal-finance-tracker/backend/` (repositories + services + routes)
 - Database: `~/codespace/personal-finance-tracker/finance.db`
@@ -18,6 +19,7 @@ python3 cli.py insert --amount <amount> --type <income|expense> --category "<slu
 ```
 
 Examples:
+
 ```bash
 python3 cli.py insert --amount 50000 --type expense --category food --subcategory gofood --note "lunch"
 python3 cli.py insert --amount 10000000 --type income --category salary --note "may salary"
@@ -151,8 +153,9 @@ Parse the JSON output and present it in a readable format. For summaries, show i
 | investments | Investments | savings |
 
 ### Subcategories
-- **fixed**: rent, electricity, internet, phone, water, gym, subscriptions
-- **food**: dine, gofood, grabfood, snack
+
+- **fixed**: rent, electricity, subscriptions
+- **food**: dine, gofood, snack
 - **transport**: gopay, ovo, flazz
 - **wellness**: haircut, medicine, nutrition
 - **entertainment**: hobbies, social, shopping
