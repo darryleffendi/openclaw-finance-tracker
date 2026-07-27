@@ -46,10 +46,11 @@ def edit_transaction(transaction_id):
     data = request.json or {}
     amount = data.get("amount")
     note = data.get("note")
-    if amount is None and note is None:
-        return jsonify({"error": "Supply at least one of: amount, note"}), 400
+    date = data.get("date")
+    if amount is None and note is None and date is None:
+        return jsonify({"error": "Supply at least one of: amount, note, date"}), 400
     try:
-        result = update_transaction(transaction_id, amount=amount, note=note)
+        result = update_transaction(transaction_id, amount=amount, note=note, date=date)
     except ValueError as e:
         return jsonify({"error": str(e)}), 400
     if result is None:

@@ -77,21 +77,31 @@ def delete_transaction(txn_id: int) -> bool:
         return True
 
 
-def update_transaction(txn_id: int, amount: float = None, note: str = None):
+def update_transaction(txn_id: int, amount: float = None, note: str = None, date: str = None):
     """
-    Edit a transaction's amount and/or note. Type and category are immutable.
+    Edit a transaction's amount, note and/or date. Type and category are immutable.
 
     Auto-distribution rows (note='auto-distribution from salary') cannot be
     edited directly — edit the parent salary row instead.
 
-    For salary income rows: amount change uses delete-and-reinsert to correctly
-    re-run the salary cascade. The returned new_id replaces the old id.
+    For salary income rows: an amount or date change uses delete-and-reinsert to
+    correctly re-run the salary cascade at the (possibly new) date. The returned
+    new_id replaces the old id.
+
+    A date change that crosses a month boundary moves the transaction's bucket
+    impact from the old month to the new month, since buckets are month-keyed.
 
     Returns a dict with the result including new_id (may equal txn_id for
     non-salary edits).
     """
-    if amount is None and note is None:
-        raise ValueError("Supply at least one of: amount, note")
+    if amount is None and note is None and date is None:
+        raise ValueError("Supply at least one of: amount, note, date")
+
+    if date is not None:
+        try:
+            datetime.strptime(date, "%Y-%m-%d")
+        except ValueError:
+            raise ValueError("Date must be in YYYY-MM-DD format")
 
     with get_connection() as conn:
         row = transaction_repo.get_by_id(conn, txn_id)
@@ -101,33 +111,47 @@ def update_transaction(txn_id: int, amount: float = None, note: str = None):
         if row["note"] == AUTO_DIST_NOTE:
             raise ValueError("Cannot edit auto-distribution rows directly. Edit the parent salary transaction instead.")
 
-    # Salary amount change: cascade-delete old + reinsert with new amount
-    if amount is not None and amount != row["amount"] and row["category"] == "salary" and row["type"] == "income":
+    new_date = date if date is not None else row["date"]
+    amount_changed = amount is not None and amount != row["amount"]
+    date_changed = date is not None and date != row["date"]
+    month_changed = date_changed and new_date[:7] != row["date"][:7]
+
+    # Salary amount or date change: cascade-delete old + reinsert at new date
+    if (amount_changed or date_changed) and row["category"] == "salary" and row["type"] == "income":
         delete_transaction(txn_id)
         new_id, distributed = insert_transaction(
-            amount=amount,
+            amount=amount if amount is not None else row["amount"],
             type=row["type"],
             category=row["category"],
             subcategory=row["subcategory"],
             note=note if note is not None else row["note"],
-            date=row["date"],
+            date=new_date,
         )
         return {"new_id": new_id, "old_id": txn_id, "salary_redistributed": True, "distributions": distributed}
 
     # Non-salary or note-only edit: in-place update
     with get_connection() as conn:
-        row_month = row["date"][:7]
+        old_month = row["date"][:7]
+        new_month = new_date[:7]
+        old_amt = row["amount"]
+        new_amt = amount if amount is not None else old_amt
 
-        if amount is not None and amount != row["amount"]:
-            old_amt = row["amount"]
-            new_amt = amount
-            # Update the row's amount
-            conn.execute("UPDATE transactions SET amount = ? WHERE id = ?", (new_amt, txn_id))
-            # Reverse old bucket impact and apply new
+        # Reverse the full old impact from the old month and apply the full new
+        # impact to the new month. When only the amount changed within the same
+        # month this nets to (new_amt - old_amt) on that month's bucket.
+        if amount_changed or month_changed:
             if row["type"] == "income":
-                bucket_repo.apply_delta(conn, row["category"], row_month, income=new_amt - old_amt)
+                bucket_repo.apply_delta(conn, row["category"], old_month, income=-old_amt)
+                bucket_repo.apply_delta(conn, row["category"], new_month, income=new_amt)
             else:
-                bucket_repo.apply_delta(conn, row["category"], row_month, expense=new_amt - old_amt)
+                bucket_repo.apply_delta(conn, row["category"], old_month, expense=-old_amt)
+                bucket_repo.apply_delta(conn, row["category"], new_month, expense=new_amt)
+
+        if amount_changed:
+            conn.execute("UPDATE transactions SET amount = ? WHERE id = ?", (new_amt, txn_id))
+
+        if date_changed:
+            conn.execute("UPDATE transactions SET date = ? WHERE id = ?", (new_date, txn_id))
 
         if note is not None:
             transaction_repo.update_note(conn, txn_id, note)
