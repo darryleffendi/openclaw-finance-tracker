@@ -8,6 +8,8 @@ import {
   spentForAccount,
   sumSpentToday,
 } from "../../lib/dashboardData"
+import { proratedBudget, rangePace } from "../../lib/period"
+import { ymdToday } from "../../lib/format"
 
 import Card from "../ui/Card"
 import Chip from "../ui/Chip"
@@ -57,6 +59,7 @@ function SectionLabel({ children, right }) {
 
 export default function DesktopDashboard({
   data,
+  period,
   periodLabel,
   onPeriodTap,
   onSettings,
@@ -82,9 +85,8 @@ export default function DesktopDashboard({
     (a) => a.type !== "expense" && a.type !== "income"
   )
 
-  const ymd = today?.date || ""
-  const day = Number(ymd.split("-")[2]) || 1
-  const totalDays = day + (today?.days_remaining ?? 1) - 1
+  // Progress-bar pace is scoped to the selected range (elapsed / total days).
+  const pace = rangePace(period, today?.date || ymdToday())
 
   const visibleTxs = (transactions || []).filter(
     (t) => t.note !== "auto-distribution from salary"
@@ -178,9 +180,10 @@ export default function DesktopDashboard({
                     key={a.slug}
                     account={a}
                     spent={spent}
+                    budget={proratedBudget(a.monthly_budget || 0, period)}
                     sparkValues={sparkValues}
-                    dayOfMonth={day}
-                    daysInMonth={totalDays}
+                    dayOfMonth={pace.elapsed}
+                    daysInMonth={pace.total}
                     onTap={() => onAccountTap && onAccountTap(a.slug)}
                   />
                 )
@@ -192,8 +195,9 @@ export default function DesktopDashboard({
                     key={a.slug}
                     account={a}
                     spent={spent}
-                    dayOfMonth={day}
-                    daysInMonth={totalDays}
+                    budget={proratedBudget(a.monthly_budget || 0, period)}
+                    dayOfMonth={pace.elapsed}
+                    daysInMonth={pace.total}
                   />
                 )
               })}
