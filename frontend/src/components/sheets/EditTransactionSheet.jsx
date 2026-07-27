@@ -23,6 +23,7 @@ export default function EditTransactionSheet({ tx, accounts, onClose, onSaved })
   const initial = Math.abs(tx.amount)
   const [amountStr, setAmountStr] = useState(String(initial))
   const [note, setNote] = useState(tx.note || "")
+  const [date, setDate] = useState(tx.date)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState(null)
 
@@ -35,8 +36,8 @@ export default function EditTransactionSheet({ tx, accounts, onClose, onSaved })
   const displayAmount = numericAmount
     ? numericAmount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")
     : "0"
-  const changed = numericAmount !== initial || note !== (tx.note || "")
-  const canSubmit = !isAutoDistRow && changed && numericAmount > 0 && !submitting
+  const changed = numericAmount !== initial || note !== (tx.note || "") || date !== tx.date
+  const canSubmit = !isAutoDistRow && changed && numericAmount > 0 && !!date && !submitting
 
   const save = async () => {
     if (!canSubmit) return
@@ -46,6 +47,7 @@ export default function EditTransactionSheet({ tx, accounts, onClose, onSaved })
       const patch = {}
       if (numericAmount !== initial) patch.amount = numericAmount
       if (note !== (tx.note || "")) patch.note = note
+      if (date !== tx.date) patch.date = date
       const res = await patchTransaction(tx.id, patch)
       onSaved?.(res)
       onClose?.()
@@ -98,7 +100,7 @@ export default function EditTransactionSheet({ tx, accounts, onClose, onSaved })
 
         {isSalary && !isAutoDistRow && (
           <div className="py-2.5 px-3 bg-accent-soft border border-accent-glow rounded-[10px] text-[12px] text-accent leading-[1.4]">
-            Editing this amount will re-distribute the salary across all
+            Editing the amount or date will re-distribute the salary across all
             expense and savings accounts.
           </div>
         )}
@@ -123,7 +125,18 @@ export default function EditTransactionSheet({ tx, accounts, onClose, onSaved })
           value={account?.display_name || tx.category}
         />
         <ReadonlyRow label="Subcategory" value={tx.subcategory} />
-        <ReadonlyRow label="Date" value={tx.date} />
+
+        <div>
+          <FieldLabel>Date</FieldLabel>
+          <input
+            type="date"
+            value={date}
+            disabled={isAutoDistRow}
+            onChange={(e) => setDate(e.target.value)}
+            className="w-full bg-transparent border-0 border-b border-border text-fg text-[14px] py-3 outline-none"
+            style={{ colorScheme: "dark" }}
+          />
+        </div>
 
         {!isAutoDistRow && (
           <div>
