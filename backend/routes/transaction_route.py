@@ -4,6 +4,7 @@ from backend.auth import login_required
 from backend.repositories.transaction_repository import (
     get_transactions_by_category,
     get_transactions_by_period,
+    get_transactions_by_range,
 )
 from backend.services.recurring_service import materialize_if_needed
 from backend.services.transaction_service import delete_transaction, insert_transaction, update_transaction
@@ -15,10 +16,14 @@ bp = Blueprint("transactions", __name__, url_prefix="/api/transactions")
 @login_required
 def list_transactions():
     materialize_if_needed()
-    period = request.args.get("period", "this-month")
     category = request.args.get("category")
     if category:
         return jsonify(get_transactions_by_category(category))
+    start = request.args.get("start")
+    end = request.args.get("end")
+    if start or end:
+        return jsonify(get_transactions_by_range(start, end))
+    period = request.args.get("period", "this-month")
     return jsonify(get_transactions_by_period(period))
 
 

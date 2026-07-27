@@ -1,5 +1,7 @@
 from backend.db import get_connection
 
+AUTO_DIST_NOTE = "auto-distribution from salary"
+
 
 # ── Operations that take a caller-supplied connection ──────────────────────
 # Used by services that compose multiple writes into one transaction.
@@ -49,6 +51,53 @@ def get_transactions_by_period(period: str):
     with get_connection() as conn:
         rows = conn.execute(
             f"SELECT * FROM transactions {where} ORDER BY date DESC, id DESC"
+        ).fetchall()
+        return [dict(row) for row in rows]
+
+
+def _range_clause(start, end):
+    """Build a WHERE clause + named params for an inclusive [start, end] date range.
+    Either bound may be None; both None means no filter (all time)."""
+    if start and end:
+        return "WHERE date BETWEEN :start AND :end", {"start": start, "end": end}
+    if start:
+        return "WHERE date >= :start", {"start": start}
+    if end:
+        return "WHERE date <= :end", {"end": end}
+    return "", {}
+
+
+def get_transactions_by_range(start, end):
+    clause, params = _range_clause(start, end)
+    with get_connection() as conn:
+        rows = conn.execute(
+            f"SELECT * FROM transactions {clause} ORDER BY date DESC, id DESC",
+            params,
+        ).fetchall()
+        return [dict(row) for row in rows]
+
+
+def aggregate_accounts_by_range(start, end):
+    """Per-account (category) totals for a date range, shaped like account_buckets
+    rows. Auto-distribution transactions are split out into auto_dist_in/out so
+    the frontend's spentForAccount() logic works unchanged. `IS`/`IS NOT` is used
+    (not =/!=) so NULL-note rows compare correctly."""
+    clause, params = _range_clause(start, end)
+    params["ad"] = AUTO_DIST_NOTE
+    with get_connection() as conn:
+        rows = conn.execute(
+            f"""
+            SELECT
+                category AS slug,
+                COALESCE(SUM(CASE WHEN type='income'  AND note IS NOT :ad THEN amount ELSE 0 END), 0) AS income,
+                COALESCE(SUM(CASE WHEN type='expense' AND note IS NOT :ad THEN amount ELSE 0 END), 0) AS expense,
+                COALESCE(SUM(CASE WHEN type='income'  AND note IS     :ad THEN amount ELSE 0 END), 0) AS auto_dist_in,
+                COALESCE(SUM(CASE WHEN type='expense' AND note IS     :ad THEN amount ELSE 0 END), 0) AS auto_dist_out
+            FROM transactions
+            {clause}
+            GROUP BY category
+            """,
+            params,
         ).fetchall()
         return [dict(row) for row in rows]
 

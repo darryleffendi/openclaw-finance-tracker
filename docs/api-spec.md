@@ -121,6 +121,13 @@ Monthly aggregated balances keyed by `(slug, year_month)`. This is the primary s
 
 `month` defaults to the current month if omitted.
 
+**Date-range mode:** pass `start=YYYY-MM-DD` and/or `end=YYYY-MM-DD` instead of
+`month` to get per-account totals aggregated from the transactions table over an
+arbitrary inclusive range (either bound may be omitted). Rows use the same bucket
+shape (`slug`, `income`, `expense`, `auto_dist_in`, `auto_dist_out`) but omit
+`year_month`; the response echoes `start`/`end` instead of `month`. Used by the
+dashboard's period picker for single-date/week/custom-range selections.
+
 **Response** `200`:
 ```json
 {
@@ -234,7 +241,8 @@ List transactions. Also triggers lazy recurring materialization.
 | param | values | default | effect |
 |---|---|---|---|
 | `period` | `today`, `this-week`, `this-month`, `last-month`, `all` | `this-month` | Filter by date range |
-| `category` | account slug | — | Filter by category (overrides `period`) |
+| `start` / `end` | `YYYY-MM-DD` | — | Inclusive custom date range; either bound optional. Overrides `period` (but not `category`) |
+| `category` | account slug | — | Filter by category (overrides `period`/`start`/`end`) |
 
 **Response** `200` — array of transaction objects, ordered by date DESC, id DESC:
 ```json
@@ -366,8 +374,11 @@ Aggregate income/expense totals for a period. Also triggers lazy recurring mater
 | param | values | default |
 |---|---|---|
 | `period` | `today`, `this-week`, `this-month`, `last-month`, `all` | `this-month` |
+| `start` / `end` | `YYYY-MM-DD` | — |
 
 `this-month` and `last-month` are served from the buckets table (fast). Other periods aggregate from the transactions table.
+
+Pass `start` and/or `end` (inclusive, either bound optional) for an arbitrary date range instead of a `period`; the range is aggregated from the transactions table and the response reports `"period": "custom"` plus the `start`/`end` used.
 
 Auto-distribution rows are **excluded** from totals — `income` and `expense` reflect real external money flow only.
 
