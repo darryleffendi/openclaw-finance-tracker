@@ -43,21 +43,36 @@ export const patchAccount = (slug, patch) =>
   sendJson("PATCH", `/accounts/${slug}`, patch)
 
 // ── Buckets ────────────────────────────────────────────────────────
-export const getBuckets = (month) =>
-  getJson(`/buckets${month ? `?month=${month}` : ""}`)
+// Pass { start, end } for a custom range, or { month } for a single month.
+export function getBuckets({ month, start, end } = {}) {
+  const qs = new URLSearchParams()
+  if (start) qs.set("start", start)
+  if (end) qs.set("end", end)
+  if (!start && !end && month) qs.set("month", month)
+  return getJson(`/buckets${qs.toString() ? `?${qs}` : ""}`)
+}
 
 // ── Today's allowance ──────────────────────────────────────────────
 export const getToday = () => getJson("/today")
 
 // ── Summary ────────────────────────────────────────────────────────
-export const getSummary = (period = "this-month") =>
-  getJson(`/summary?period=${period}`)
+// Pass { start, end } for a custom range, otherwise a { period } preset.
+export function getSummary({ period, start, end } = {}) {
+  const qs = new URLSearchParams()
+  if (start) qs.set("start", start)
+  if (end) qs.set("end", end)
+  if (!start && !end) qs.set("period", period || "this-month")
+  return getJson(`/summary?${qs}`)
+}
 
 // ── Transactions ───────────────────────────────────────────────────
-export function getTransactions({ period, category } = {}) {
+export function getTransactions({ period, category, start, end } = {}) {
   const qs = new URLSearchParams()
   if (category) qs.set("category", category)
-  else if (period) qs.set("period", period)
+  else if (start || end) {
+    if (start) qs.set("start", start)
+    if (end) qs.set("end", end)
+  } else if (period) qs.set("period", period)
   return getJson(`/transactions${qs.toString() ? `?${qs}` : ""}`)
 }
 
