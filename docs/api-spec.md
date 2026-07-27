@@ -306,12 +306,14 @@ If `category = "salary"` and `type = "income"`, salary auto-distribution fires a
 ---
 
 ### `PATCH /api/transactions/:id`
-Edit a transaction's `amount` and/or `note`. Type and category are immutable.
+Edit a transaction's `amount`, `note` and/or `date`. Type and category are immutable.
 
 **Request body** (supply at least one):
 ```json
-{ "amount": 75000, "note": "updated note" }
+{ "amount": 75000, "note": "updated note", "date": "2026-07-20" }
 ```
+
+`date` must be `YYYY-MM-DD`. Changing the date to a different month moves the transaction's monthly bucket impact from the old month to the new one.
 
 **Response** `200`:
 ```json
@@ -322,7 +324,7 @@ Edit a transaction's `amount` and/or `note`. Type and category are immutable.
 }
 ```
 
-**Salary amount edits:** When editing the `amount` of a salary income transaction, the backend cascade-deletes the old row and all its auto-distribution rows, then reinserts with the new amount. The `new_id` will differ from `old_id`. Refresh your transaction list after this call.
+**Salary amount/date edits:** When editing the `amount` or `date` of a salary income transaction, the backend cascade-deletes the old row and all its auto-distribution rows, then reinserts (re-running distribution at the new date). The `new_id` will differ from `old_id`. Refresh your transaction list after this call.
 
 ```json
 {
@@ -334,7 +336,7 @@ Edit a transaction's `amount` and/or `note`. Type and category are immutable.
 ```
 
 **Errors:**
-- `400` — no fields supplied, or row is an auto-distribution row (edit the parent salary transaction instead)
+- `400` — no fields supplied, malformed `date` (not `YYYY-MM-DD`), or row is an auto-distribution row (edit the parent salary transaction instead)
 - `404` — transaction not found
 
 ---
