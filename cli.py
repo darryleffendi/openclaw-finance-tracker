@@ -7,6 +7,7 @@ from backend.repositories.transaction_repository import (
     get_all_transactions,
     get_transactions_by_category,
     get_transactions_by_period,
+    get_transactions_by_range,
 )
 from backend.services.distribution_service import distribute_salary
 from backend.services.today_service import get_today
@@ -18,7 +19,7 @@ from backend.services.recurring_service import (
     run_now,
     update_rule,
 )
-from backend.services.summary_service import get_summary
+from backend.services.summary_service import get_summary, get_summary_range
 from backend.services.transaction_service import delete_transaction, insert_transaction, update_transaction
 
 
@@ -43,6 +44,8 @@ def main():
         default="this-month",
     )
     query_parser.add_argument("--category", default=None, help="Filter by category/account slug")
+    query_parser.add_argument("--start", default=None, help="Range start YYYY-MM-DD (overrides --period)")
+    query_parser.add_argument("--end", default=None, help="Range end YYYY-MM-DD (overrides --period)")
     query_parser.add_argument("--summary", action="store_true", help="Return summary only")
 
     # Delete
@@ -132,9 +135,14 @@ def main():
 
     elif args.command == "query":
         if args.summary:
-            result = get_summary(args.period)
+            if args.start or args.end:
+                result = get_summary_range(args.start, args.end)
+            else:
+                result = get_summary(args.period)
         elif args.category:
             result = get_transactions_by_category(args.category)
+        elif args.start or args.end:
+            result = get_transactions_by_range(args.start, args.end)
         else:
             result = get_transactions_by_period(args.period)
         print(json.dumps(result, indent=2))

@@ -16,13 +16,16 @@ function accountTypeLabel(t) {
 export default function AccountCard({
   account,
   spent,
+  budget: budgetProp,
   sparkValues,
   dayOfMonth,
   daysInMonth,
   onTap,
   recurring,
 }) {
-  const budget = account.monthly_budget || 0
+  // budgetProp is the period-prorated budget; null = no budget framing (all time).
+  const noBudget = budgetProp === null
+  const budget = budgetProp === undefined ? account.monthly_budget || 0 : budgetProp || 0
   const remaining = budget - spent
   const over = remaining < 0
   const color = statusFor(remaining, Math.max(1, budget))
@@ -35,6 +38,10 @@ export default function AccountCard({
     bigNumber = formatIDR(spent)
     bigColor = TOKENS.income
     bigLabel = "received"
+  } else if (noBudget) {
+    bigNumber = formatIDR(spent)
+    bigColor = isSavings ? "var(--accent)" : TOKENS.fg
+    bigLabel = isSavings || isHolding ? "saved" : "spent"
   } else if (over) {
     bigNumber = `Over by ${formatIDR(Math.abs(remaining))}`
     bigColor = TOKENS.red
@@ -51,6 +58,7 @@ export default function AccountCard({
 
   const showSpark =
     !isIncome && !isSavings && !isHolding && sparkValues && sparkValues.length > 1
+  const showProgress = !isIncome && !noBudget
 
   return (
     <Card
@@ -93,7 +101,7 @@ export default function AccountCard({
       <div className="text-[11.5px] text-fg-muted mb-2.5">
         {bigLabel}
       </div>
-      {!isIncome && (
+      {showProgress && (
         <ProgressBar
           spent={spent}
           budget={budget}

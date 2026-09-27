@@ -6,11 +6,16 @@ import {
   getSummary,
   getTransactions,
 } from "../api"
-import { currentYearMonth, ymdToday } from "./format"
+import { ymdToday } from "./format"
+
+// All time has no bounds; use wide sentinels so the range-aware endpoints
+// aggregate every transaction (buckets/summary/transactions share one path).
+const ALL_START = "1970-01-01"
+const ALL_END = "9999-12-31"
 
 // Aggregate everything the mobile dashboard needs in a single hook.
-// Triggers a refresh when period changes or when refresh() is called.
-export function useDashboardData(period = "this-month", month) {
+// Triggers a refresh when the period range changes or refresh() is called.
+export function useDashboardData(period) {
   const [accounts, setAccounts] = useState(null)
   const [buckets, setBuckets] = useState(null)
   const [today, setToday] = useState(null)
@@ -19,16 +24,18 @@ export function useDashboardData(period = "this-month", month) {
   const [error, setError] = useState(null)
   const [loading, setLoading] = useState(true)
 
+  const start = period.start || ALL_START
+  const end = period.end || ALL_END
+
   const refresh = useCallback(() => {
-    const ym = month || currentYearMonth()
     setLoading(true)
     setError(null)
     Promise.all([
       getAccounts(),
-      getBuckets(ym),
+      getBuckets({ start, end }),
       getToday(),
-      getSummary(period),
-      getTransactions({ period }),
+      getSummary({ start, end }),
+      getTransactions({ start, end }),
     ])
       .then(([a, b, t, s, tx]) => {
         setAccounts(a)
@@ -42,7 +49,7 @@ export function useDashboardData(period = "this-month", month) {
         setError(e)
         setLoading(false)
       })
-  }, [period, month])
+  }, [start, end])
 
   useEffect(refresh, [refresh])
 

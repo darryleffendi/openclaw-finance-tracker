@@ -9,18 +9,11 @@ import Login from "./components/screens/Login"
 import AddTransactionSheet from "./components/sheets/AddTransactionSheet"
 import EditTransactionSheet from "./components/sheets/EditTransactionSheet"
 import PeriodPicker from "./components/sheets/PeriodPicker"
+import { defaultPeriod } from "./lib/period"
 import { UnauthorizedError } from "./api"
 
-const PERIODS = {
-  today: "Today",
-  "this-week": "This week",
-  "this-month": "This month",
-  "last-month": "Last month",
-  all: "All time",
-}
-
 export default function App() {
-  const [period, setPeriod] = useState("this-month")
+  const [period, setPeriod] = useState(defaultPeriod)
   const [screen, setScreen] = useState({ name: "home" })
   const [sheet, setSheet] = useState(null)
   const data = useDashboardData(period)
@@ -67,7 +60,8 @@ export default function App() {
     content = (
       <Dashboard
         data={data}
-        periodLabel={PERIODS[period]}
+        period={period}
+        periodLabel={period.label}
         onPeriodTap={() => setSheet({ kind: "period" })}
         onSettings={() => setScreen({ name: "settings" })}
         onAdd={() => setSheet({ kind: "add" })}

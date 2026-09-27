@@ -2,7 +2,10 @@ from datetime import datetime
 
 from backend.repositories import account_bucket_repository as bucket_repo
 from backend.repositories.account_repository import get_accounts
-from backend.repositories.transaction_repository import get_transactions_by_period
+from backend.repositories.transaction_repository import (
+    get_transactions_by_period,
+    get_transactions_by_range,
+)
 
 AUTO_DIST_NOTE = "auto-distribution from salary"
 
@@ -48,5 +51,26 @@ def get_summary(period: str = "this-month"):
         "expense": expense,
         "balance": income - expense,
         "transaction_count": txn_count,
+        "accounts": get_accounts(),
+    }
+
+
+def get_summary_range(start, end):
+    """Income/expense/net for an arbitrary [start, end] date range, aggregated
+    from the transactions table (auto-distribution rows excluded)."""
+    real_txns = [
+        t for t in get_transactions_by_range(start, end)
+        if t.get("note") != AUTO_DIST_NOTE
+    ]
+    income = sum(t["amount"] for t in real_txns if t["type"] == "income")
+    expense = sum(t["amount"] for t in real_txns if t["type"] == "expense")
+    return {
+        "period": "custom",
+        "start": start,
+        "end": end,
+        "income": income,
+        "expense": expense,
+        "balance": income - expense,
+        "transaction_count": len(real_txns),
         "accounts": get_accounts(),
     }
