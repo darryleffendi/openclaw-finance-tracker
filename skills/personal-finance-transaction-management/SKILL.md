@@ -151,6 +151,8 @@ Parse the JSON output and present it in a readable format. For summaries, show i
 | entertainment | Social & Entertainment | expense |
 | savings | Savings | savings |
 | investments | Investments | savings |
+| date | Date | expense |
+| charity | Charity | expense |
 
 ### Subcategories
 
@@ -159,3 +161,5 @@ Parse the JSON output and present it in a readable format. For summaries, show i
 - **transport**: gopay, ovo, flazz
 - **wellness**: haircut, medicine, nutrition
 - **entertainment**: hobbies, social, shopping
+- **date**: gifts, dinner (anything spent on/for a date)
+- **charity**: anything given to people (donations, zakat, helping others)

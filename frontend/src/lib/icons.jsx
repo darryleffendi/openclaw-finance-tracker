@@ -167,6 +167,17 @@ export const Icon = {
       <path d="M4 3v18M4 12h4M8 3v9a3 3 0 0 1-4 0M16 3c-2 0-3 2-3 4s1 4 3 4v10" />
     </svg>
   ),
+  Gift: (p) => (
+    <svg {...iconBase(p)}>
+      <path d="M20 12v9H4v-9M2 7h20v5H2zM12 21V7M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7zM12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z" />
+    </svg>
+  ),
+  HandHeart: (p) => (
+    <svg {...iconBase(p)}>
+      <path d="M12 11.5l-3.2-3.1a2 2 0 0 1 2.9-2.8l.3.3.3-.3a2 2 0 0 1 2.9 2.8z" />
+      <path d="M2 15h3l4 2h4a2 2 0 0 0 0-4h-3M13 15l5-2.5a2 2 0 0 1 2 3.5l-7 5H5l-3-1" />
+    </svg>
+  ),
 }
 
 export const ACCOUNT_ICON = {
@@ -180,4 +191,6 @@ export const ACCOUNT_ICON = {
   entertainment: Icon.Music,
   savings: Icon.Pig,
   investments: Icon.Trend2,
+  date: Icon.Gift,
+  charity: Icon.HandHeart,
 }

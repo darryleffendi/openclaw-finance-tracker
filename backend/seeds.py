@@ -96,4 +96,22 @@ ACCOUNTS = [
         "subcategories": [],
         "sort_order": 10,
     },
+    {
+        "slug": "date",
+        "display_name": "Date",
+        "type": "expense",
+        "monthly_budget": 0,
+        "daily_budget_enabled": 0,
+        "subcategories": ["gifts", "dinner"],
+        "sort_order": 11,
+    },
+    {
+        "slug": "charity",
+        "display_name": "Charity",
+        "type": "expense",
+        "monthly_budget": 0,
+        "daily_budget_enabled": 0,
+        "subcategories": [],
+        "sort_order": 12,
+    },
 ]
