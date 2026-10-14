@@ -123,7 +123,7 @@ Monthly aggregated balances keyed by `(slug, year_month)`. This is the primary s
 **Date-range mode:** pass `start=YYYY-MM-DD` and/or `end=YYYY-MM-DD` instead of
 `month` to get per-account totals aggregated from the transactions table over an
 arbitrary inclusive range (either bound may be omitted). Rows use the same bucket
-shape (`slug`, `income`, `expense`, `auto_dist_in`, `auto_dist_out`, `balance`) but omit
+shape (`slug`, `income`, `expense`, `auto_dist_in`, `auto_dist_out`, `settle_in`, `settle_out`, `balance`) but omit
 `year_month`; the response echoes `start`/`end` instead of `month`. Used by the
 dashboard's period picker for single-date/week/custom-range selections.
 
@@ -162,7 +162,9 @@ dashboard's period picker for single-date/week/custom-range selections.
 | `expense` | Real expenses paid this month (excludes auto-distribution mirror) |
 | `auto_dist_in` | Amount received via salary auto-distribution |
 | `auto_dist_out` | Amount paid out via salary auto-distribution (source account only) |
-| `balance` | Computed: `income + auto_dist_in − expense − auto_dist_out`. No carry-over between months. |
+| `settle_in` | Received from month-end settlement (deficit cover, or leftovers arriving in savings) |
+| `settle_out` | Sent by month-end settlement |
+| `balance` | Computed: `income + auto_dist_in + settle_in − expense − auto_dist_out − settle_out`. No carry-over between months. |
 
 **How to compute per-account balance for the dashboard:**
 
@@ -170,7 +172,7 @@ dashboard's period picker for single-date/week/custom-range selections.
 |---|---|---|
 | `expense` | `bucket.balance` in month view (negative = overspent); `prorated monthly_budget − bucket.expense` for other ranges | `bucket.expense` |
 | `income` | `bucket.income` (received this month) | `bucket.income` |
-| `savings` | `bucket.income + bucket.auto_dist_in` (net deposits this month) | same |
+| `savings` | `bucket.balance` (deposits minus settlement withdrawals) | same |
 
 **All-time savings total:** Sum `income + auto_dist_in` across all months for that slug.
 
@@ -535,6 +537,7 @@ All error responses have the same shape:
 - Spent: `bucket.expense`
 - Progress bar %: `bucket.expense / (bucket.income + bucket.auto_dist_in) * 100`
 - Other ranges fall back to the prorated `monthly_budget`.
+- Funded excludes `settle_in`, so a settled overspent account still renders red; `settle_in` / `settle_out` are shown as a separate "covered" / "moved to savings" line.
 
 **Income category card (salary, other_income):**
 - Received this month: `bucket.income`

@@ -21,6 +21,8 @@ export default function AccountCard({
   daysInMonth,
   onTap,
   recurring,
+  settleIn = 0,
+  settleOut = 0,
 }) {
   // budgetProp is the period-prorated budget; null = no budget framing (all time).
   const noBudget = budgetProp === null
@@ -99,6 +101,13 @@ export default function AccountCard({
       <div className="text-[11.5px] text-fg-muted mb-2.5">
         {bigLabel}
       </div>
+      {(settleIn > 0 || settleOut > 0) && (
+        <div className="text-[11px] text-fg-dim -mt-1.5 mb-2.5">
+          {settleIn > 0
+            ? `Covered at month-end · ${formatIDR(settleIn)}`
+            : `Moved to savings · ${formatIDR(settleOut)}`}
+        </div>
+      )}
       {showProgress && (
         <ProgressBar
           spent={spent}

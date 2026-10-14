@@ -187,6 +187,8 @@ export default function DesktopDashboard({
                         : proratedBudget(a.monthly_budget || 0, period)
                     }
                     sparkValues={sparkValues}
+                    settleIn={bucketMap[a.slug]?.settle_in}
+                    settleOut={bucketMap[a.slug]?.settle_out}
                     dayOfMonth={pace.elapsed}
                     daysInMonth={pace.total}
                     onTap={() => onAccountTap && onAccountTap(a.slug)}

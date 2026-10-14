@@ -101,12 +101,12 @@ export function bucketsBySlug(bucketsResponse) {
 // Derive "spent this month" for an account.
 // - expense: bucket.expense
 // - income:  bucket.income
-// - savings: bucket.income + bucket.auto_dist_in
+// - savings: bucket.balance (deposits minus settlement withdrawals)
 export function spentForAccount(account, bucket) {
   if (!bucket) return 0
   if (account.type === "expense") return bucket.expense || 0
   if (account.type === "income") return bucket.income || 0
-  return (bucket.income || 0) + (bucket.auto_dist_in || 0)
+  return bucket.balance || 0
 }
 
 // Money actually put into an account this month (income + auto-distribution in).
