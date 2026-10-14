@@ -1,13 +1,17 @@
 from backend.db import get_connection
 
 # Net balance of a bucket: everything in minus everything out.
-_SELECT_WITH_BALANCE = "SELECT *, income + auto_dist_in - expense - auto_dist_out AS balance FROM account_buckets"
+_SELECT_WITH_BALANCE = (
+    "SELECT *, income + auto_dist_in + settle_in - expense - auto_dist_out - settle_out AS balance "
+    "FROM account_buckets"
+)
 
 
 # ── Operations that take a caller-supplied connection ──────────────────────
 # Used by services that compose multiple writes into one transaction.
 
-def apply_delta(conn, slug, year_month, *, income=0, expense=0, auto_dist_in=0, auto_dist_out=0):
+def apply_delta(conn, slug, year_month, *, income=0, expense=0, auto_dist_in=0, auto_dist_out=0,
+                settle_in=0, settle_out=0):
     """
     Increment any subset of the bucket's columns. Creates the bucket row
     on first use via UPSERT (SQLite ON CONFLICT). Pass negative values to
@@ -15,15 +19,17 @@ def apply_delta(conn, slug, year_month, *, income=0, expense=0, auto_dist_in=0, 
     """
     conn.execute(
         """
-        INSERT INTO account_buckets (slug, year_month, income, expense, auto_dist_in, auto_dist_out)
-        VALUES (?, ?, ?, ?, ?, ?)
+        INSERT INTO account_buckets (slug, year_month, income, expense, auto_dist_in, auto_dist_out, settle_in, settle_out)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         ON CONFLICT(slug, year_month) DO UPDATE SET
             income        = income        + excluded.income,
             expense       = expense       + excluded.expense,
             auto_dist_in  = auto_dist_in  + excluded.auto_dist_in,
-            auto_dist_out = auto_dist_out + excluded.auto_dist_out
+            auto_dist_out = auto_dist_out + excluded.auto_dist_out,
+            settle_in     = settle_in     + excluded.settle_in,
+            settle_out    = settle_out    + excluded.settle_out
         """,
-        (slug, year_month, income, expense, auto_dist_in, auto_dist_out),
+        (slug, year_month, income, expense, auto_dist_in, auto_dist_out, settle_in, settle_out),
     )
 
 

@@ -7,6 +7,12 @@ from backend.repositories import transaction_repository as transaction_repo
 from backend.services.distribution_service import distribute_within, transfer_within
 
 
+def _internal_column(row):
+    """Bucket column an auto-distribution row was recorded in."""
+    prefix = "settle" if row["subcategory"] == transaction_repo.SETTLEMENT_SUBCATEGORY else "auto_dist"
+    return f"{prefix}_{'in' if row['type'] == 'income' else 'out'}"
+
+
 def insert_transaction(
     amount: float,
     type: str,
@@ -102,10 +108,7 @@ def delete_transaction(txn_id: int) -> bool:
         for dr in transaction_repo.find_children(conn, txn_id):
             dr_month = dr["date"][:7]
             transaction_repo.delete(conn, dr["id"])
-            if dr["type"] == "income":
-                bucket_repo.apply_delta(conn, dr["category"], dr_month, auto_dist_in=-dr["amount"])
-            else:
-                bucket_repo.apply_delta(conn, dr["category"], dr_month, auto_dist_out=-dr["amount"])
+            bucket_repo.apply_delta(conn, dr["category"], dr_month, **{_internal_column(dr): -dr["amount"]})
 
         # Reverse the main row's bucket impact. Skip if this row is itself an
         # auto-distribution (handled in the cascade above to avoid double-reversal).
@@ -113,7 +116,7 @@ def delete_transaction(txn_id: int) -> bool:
             row_month = row["date"][:7]
             if row["note"] == transaction_repo.AUTO_DIST_NOTE:
                 # Transfer source row: recorded as auto-distribution out, not expense.
-                bucket_repo.apply_delta(conn, row["category"], row_month, auto_dist_out=-row["amount"])
+                bucket_repo.apply_delta(conn, row["category"], row_month, **{_internal_column(row): -row["amount"]})
             elif row["type"] == "income":
                 bucket_repo.apply_delta(conn, row["category"], row_month, income=-row["amount"])
             else:
