@@ -6,7 +6,7 @@ from backend.repositories import account_repository as account_repo
 from backend.repositories import transaction_repository as transaction_repo
 
 
-def distribute_within(conn, source_account: str, amount: float, date: str):
+def distribute_within(conn, source_account: str, amount: float, date: str, parent_id=None):
     """
     Distribute a deposit across all expense/savings accounts in proportion
     to their monthly_budget. Operates on the caller's open connection — does
@@ -15,6 +15,7 @@ def distribute_within(conn, source_account: str, amount: float, date: str):
     Inserts one income row per target (for the audit trail) and one matching
     expense row on source_account for the total distributed, so the balance
     invariant `balance == sum(signed txn amounts)` holds on every account.
+    All inserted rows carry parent_id so deleting the parent cascades to them.
     """
     targets = account_repo.get_distribution_targets(conn)
 
@@ -45,6 +46,7 @@ def distribute_within(conn, source_account: str, amount: float, date: str):
             subcategory=None,
             note="auto-distribution from salary",
             date=date,
+            parent_id=parent_id,
         )
         bucket_repo.apply_delta(conn, target["slug"], year_month, auto_dist_in=share)
         distributed.append({"account": target["slug"], "amount": share})
@@ -59,6 +61,7 @@ def distribute_within(conn, source_account: str, amount: float, date: str):
             subcategory=None,
             note="auto-distribution from salary",
             date=date,
+            parent_id=parent_id,
         )
         bucket_repo.apply_delta(conn, source_account, year_month, auto_dist_out=total_distributed)
 

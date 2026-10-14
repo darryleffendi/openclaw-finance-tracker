@@ -34,6 +34,8 @@ def init_db():
                 created_at  TEXT DEFAULT (datetime('now'))
             )
         """)
+        # Auto-distribution rows point at the income row that generated them.
+        _ensure_column(conn, "transactions", "parent_id", "INTEGER REFERENCES transactions(id)")
         conn.execute("""
             CREATE TABLE IF NOT EXISTS accounts (
                 slug           TEXT    PRIMARY KEY NOT NULL,
