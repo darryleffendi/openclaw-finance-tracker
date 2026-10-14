@@ -10,6 +10,7 @@ from backend.repositories.transaction_repository import (
     get_transactions_by_range,
 )
 from backend.services.today_service import get_today
+from backend.services.settlement_service import settle, unsettle
 from backend.services.recurring_service import (
     create_rule,
     delete_rule,
@@ -63,6 +64,12 @@ def main():
     transfer_parser.add_argument("--to", dest="target_account", required=True, help="Target account slug")
     transfer_parser.add_argument("--amount", type=float, required=True)
     transfer_parser.add_argument("--date", default=None, help="YYYY-MM-DD, defaults to today")
+
+    # Settle
+    settle_parser = subparsers.add_parser("settle", help="Settle a month: zero expense balances via savings/investments")
+    settle_parser.add_argument("--month", required=True, help="YYYY-MM")
+    settle_parser.add_argument("--force", action="store_true", help="Allow settling the current (unfinished) month")
+    settle_parser.add_argument("--undo", action="store_true", help="Remove the month's settlement transfers")
 
     # Accounts
     subparsers.add_parser("accounts", help="List all accounts with balances")
@@ -172,6 +179,14 @@ def main():
             print(json.dumps({"success": False, "error": str(e)}))
             sys.exit(1)
         print(json.dumps({"success": True, **result}))
+
+    elif args.command == "settle":
+        try:
+            result = unsettle(args.month) if args.undo else settle(args.month, force=args.force)
+        except ValueError as e:
+            print(json.dumps({"success": False, "error": str(e)}))
+            sys.exit(1)
+        print(json.dumps({"success": True, **result}, indent=2))
 
     elif args.command in ("accounts", "categories"):
         if args.command == "categories":

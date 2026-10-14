@@ -126,6 +126,16 @@ python3 cli.py transfer --from food --to savings --amount 500000 --date 2026-05-
 
 Writes an expense on the source and an income on the target (both auto-distribution rows), so balances move but income/expense totals don't. Transfers can't be edited; delete the source row (returned `id`) to undo — the target row is removed with it.
 
+## Month-End Settlement
+
+```bash
+python3 cli.py settle --month 2026-09          # settle a finished month
+python3 cli.py settle --month 2026-10 --force  # settle the current month anyway
+python3 cli.py settle --month 2026-09 --undo   # remove that month's settlement
+```
+
+Brings every expense account's balance for the month to 0 with transfers dated the month's last day (subcategory `settlement`). Leftovers go to savings; deficits are covered from savings, then investments (which may go negative). Re-running only settles what changed since (e.g. late transactions).
+
 ## Extending with New Query Types
 
 If the user asks for a query type not yet supported (e.g., "show by date range", "top 5 accounts"):

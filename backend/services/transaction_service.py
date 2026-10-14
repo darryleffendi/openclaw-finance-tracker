@@ -52,6 +52,39 @@ def insert_transaction(
         return txn_id, distributed
 
 
+def insert_transfer(conn, source_account, target_account, amount, date, subcategory=None):
+    """
+    Write a transfer pair on the caller's connection (no commit): an expense on
+    the source (parent) and a matching income on the target (child). Rows tagged
+    with the settlement subcategory go to settle_* bucket columns, others to
+    auto_dist_*. Returns (source_id, target_id).
+    """
+    year_month = date[:7]
+    prefix = "settle" if subcategory == transaction_repo.SETTLEMENT_SUBCATEGORY else "auto_dist"
+    source_id = transaction_repo.insert(
+        conn,
+        amount=amount,
+        type="expense",
+        category=source_account,
+        subcategory=subcategory,
+        note=transaction_repo.AUTO_DIST_NOTE,
+        date=date,
+    )
+    bucket_repo.apply_delta(conn, source_account, year_month, **{f"{prefix}_out": amount})
+    target_id = transaction_repo.insert(
+        conn,
+        amount=amount,
+        type="income",
+        category=target_account,
+        subcategory=subcategory,
+        note=transaction_repo.AUTO_DIST_NOTE,
+        date=date,
+        parent_id=source_id,
+    )
+    bucket_repo.apply_delta(conn, target_account, year_month, **{f"{prefix}_in": amount})
+    return source_id, target_id
+
+
 def transfer(source_account: str, target_account: str, amount: float, date: str = None):
     """
     Move money from source_account to target_account. Writes an expense on the
@@ -65,34 +98,13 @@ def transfer(source_account: str, target_account: str, amount: float, date: str 
         raise ValueError("Amount must be positive")
     if date is None:
         date = datetime.now().strftime("%Y-%m-%d")
-    year_month = date[:7]
 
     with get_connection() as conn:
         for slug in (source_account, target_account):
             if account_repo.get_by_slug(conn, slug) is None:
                 raise ValueError(f"Account not found: {slug}")
 
-        source_id = transaction_repo.insert(
-            conn,
-            amount=amount,
-            type="expense",
-            category=source_account,
-            subcategory=None,
-            note=transaction_repo.AUTO_DIST_NOTE,
-            date=date,
-        )
-        bucket_repo.apply_delta(conn, source_account, year_month, auto_dist_out=amount)
-        target_id = transaction_repo.insert(
-            conn,
-            amount=amount,
-            type="income",
-            category=target_account,
-            subcategory=None,
-            note=transaction_repo.AUTO_DIST_NOTE,
-            date=date,
-            parent_id=source_id,
-        )
-        bucket_repo.apply_delta(conn, target_account, year_month, auto_dist_in=amount)
+        source_id, target_id = insert_transfer(conn, source_account, target_account, amount, date)
         conn.commit()
         return {"id": source_id, "target_id": target_id}
 

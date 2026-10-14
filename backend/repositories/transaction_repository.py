@@ -38,6 +38,15 @@ def find_children(conn, parent_id):
     ).fetchall()
 
 
+def find_settlement_sources(conn, year_month):
+    """Parent rows of a month's settlement transfers (deleting them undoes the month)."""
+    return conn.execute(
+        "SELECT id FROM transactions WHERE subcategory = ? AND parent_id IS NULL AND note = ? "
+        "AND strftime('%Y-%m', date) = ?",
+        (SETTLEMENT_SUBCATEGORY, AUTO_DIST_NOTE, year_month),
+    ).fetchall()
+
+
 # ── Standalone read operations (own their own connection) ──────────────────
 
 def get_transactions_by_period(period: str):
