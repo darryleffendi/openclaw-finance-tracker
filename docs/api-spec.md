@@ -124,7 +124,7 @@ Monthly aggregated balances keyed by `(slug, year_month)`. This is the primary s
 **Date-range mode:** pass `start=YYYY-MM-DD` and/or `end=YYYY-MM-DD` instead of
 `month` to get per-account totals aggregated from the transactions table over an
 arbitrary inclusive range (either bound may be omitted). Rows use the same bucket
-shape (`slug`, `income`, `expense`, `auto_dist_in`, `auto_dist_out`) but omit
+shape (`slug`, `income`, `expense`, `auto_dist_in`, `auto_dist_out`, `balance`) but omit
 `year_month`; the response echoes `start`/`end` instead of `month`. Used by the
 dashboard's period picker for single-date/week/custom-range selections.
 
@@ -139,7 +139,8 @@ dashboard's period picker for single-date/week/custom-range selections.
       "income": 0.0,
       "expense": 1220500.0,
       "auto_dist_in": 1303779.0,
-      "auto_dist_out": 0.0
+      "auto_dist_out": 0.0,
+      "balance": 83279.0
     },
     {
       "slug": "salary",
@@ -147,7 +148,8 @@ dashboard's period picker for single-date/week/custom-range selections.
       "income": 12222000.0,
       "expense": 0.0,
       "auto_dist_in": 0.0,
-      "auto_dist_out": 12222000.0
+      "auto_dist_out": 12222000.0,
+      "balance": 0.0
     }
   ]
 }
@@ -161,18 +163,20 @@ dashboard's period picker for single-date/week/custom-range selections.
 | `expense` | Real expenses paid this month (excludes auto-distribution mirror) |
 | `auto_dist_in` | Amount received via salary auto-distribution |
 | `auto_dist_out` | Amount paid out via salary auto-distribution (source account only) |
+| `balance` | Computed: `income + auto_dist_in − expense − auto_dist_out`. No carry-over between months. |
 
 **How to compute per-account balance for the dashboard:**
 
 | Account type | "Remaining" formula | "Spent/Saved" |
 |---|---|---|
-| `expense` | `monthly_budget − bucket.expense` (negative = over budget) | `bucket.expense` |
+| `expense` | `bucket.balance` in month view (negative = overspent); `prorated monthly_budget − bucket.expense` for other ranges | `bucket.expense` |
 | `income` | `bucket.income` (received this month) | `bucket.income` |
 | `savings` | `bucket.income + bucket.auto_dist_in` (net deposits this month) | same |
+| `holding` | `bucket.balance` (received minus distributed onward) | same |
 
 **All-time savings total:** Sum `income + auto_dist_in` across all months for that slug.
 
-**Budget remaining for `daily_budget_enabled` accounts:** `monthly_budget − bucket.expense`
+**Remaining for `daily_budget_enabled` accounts:** `bucket.balance`
 
 > Bucket rows are created on first transaction for a `(slug, month)` pair. An account with no activity in a month will have no bucket row for that month — treat missing rows as all zeros.
 
@@ -183,7 +187,7 @@ dashboard's period picker for single-date/week/custom-range selections.
 ### `GET /api/today`
 Computes today's daily spending allowance across all accounts with `daily_budget_enabled = 1`. Also triggers lazy recurring materialization.
 
-**Formula per account:** `(monthly_budget − bucket.expense) / days_remaining_in_month` (days inclusive of today).
+**Formula per account:** `bucket.balance / days_remaining_in_month` (days inclusive of today). Balance is `income + auto_dist_in − expense − auto_dist_out` for the current month, so it is 0 until that month's salary is distributed.
 
 **Response** `200`:
 ```json

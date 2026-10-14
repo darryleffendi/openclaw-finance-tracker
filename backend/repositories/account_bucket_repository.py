@@ -1,5 +1,8 @@
 from backend.db import get_connection
 
+# Net balance of a bucket: everything in minus everything out.
+_SELECT_WITH_BALANCE = "SELECT *, income + auto_dist_in - expense - auto_dist_out AS balance FROM account_buckets"
+
 
 # ── Operations that take a caller-supplied connection ──────────────────────
 # Used by services that compose multiple writes into one transaction.
@@ -26,14 +29,14 @@ def apply_delta(conn, slug, year_month, *, income=0, expense=0, auto_dist_in=0, 
 
 def get_for_month(conn, slug, year_month):
     return conn.execute(
-        "SELECT * FROM account_buckets WHERE slug = ? AND year_month = ?",
+        f"{_SELECT_WITH_BALANCE} WHERE slug = ? AND year_month = ?",
         (slug, year_month),
     ).fetchone()
 
 
 def get_all_for_month_with_conn(conn, year_month):
     rows = conn.execute(
-        "SELECT * FROM account_buckets WHERE year_month = ?",
+        f"{_SELECT_WITH_BALANCE} WHERE year_month = ?",
         (year_month,),
     ).fetchall()
     return [dict(r) for r in rows]

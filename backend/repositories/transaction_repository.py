@@ -92,7 +92,8 @@ def aggregate_accounts_by_range(start, end):
                 COALESCE(SUM(CASE WHEN type='income'  AND note IS NOT :ad THEN amount ELSE 0 END), 0) AS income,
                 COALESCE(SUM(CASE WHEN type='expense' AND note IS NOT :ad THEN amount ELSE 0 END), 0) AS expense,
                 COALESCE(SUM(CASE WHEN type='income'  AND note IS     :ad THEN amount ELSE 0 END), 0) AS auto_dist_in,
-                COALESCE(SUM(CASE WHEN type='expense' AND note IS     :ad THEN amount ELSE 0 END), 0) AS auto_dist_out
+                COALESCE(SUM(CASE WHEN type='expense' AND note IS     :ad THEN amount ELSE 0 END), 0) AS auto_dist_out,
+                COALESCE(SUM(CASE WHEN type='income' THEN amount ELSE -amount END), 0) AS balance
             FROM transactions
             {clause}
             GROUP BY category

@@ -12,13 +12,14 @@ def get_today():
     daily_budget_enabled is set.
 
     Formula per account:
-        daily_allowance = (monthly_budget - spent_this_month) / days_remaining_in_month
+        daily_allowance = balance / days_remaining_in_month
 
-    spent_this_month = bucket.expense for this account in the current month.
+    balance = income + auto_dist_in - expense - auto_dist_out for this account
+    in the current month, i.e. what was actually funded minus what was spent.
     days_remaining includes today (inclusive).
 
     Returns a negative total_allowance when the combined daily allowance is
-    in the red — i.e. the month's budget for these categories is already
+    in the red — i.e. the month's funding for these categories is already
     exhausted or overrun.
     """
     today_iso = date.today().strftime("%Y-%m-%d")
@@ -34,7 +35,7 @@ def get_today():
         for acct in daily_accounts:
             bucket = bucket_repo.get_for_month(conn, acct["slug"], year_month)
             spent = bucket["expense"] if bucket else 0
-            remaining_in_month = acct["monthly_budget"] - spent
+            remaining_in_month = bucket["balance"] if bucket else 0
             daily = round(remaining_in_month / days_remaining)
             breakdown.append({
                 "category": acct["slug"],
