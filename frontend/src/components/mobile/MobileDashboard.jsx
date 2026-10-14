@@ -4,6 +4,7 @@ import { formatIDRShort } from "../../lib/format"
 import {
   bucketsBySlug,
   buildSparkline,
+  fundedForAccount,
   spentForAccount,
   sumSpentToday,
 } from "../../lib/dashboardData"
@@ -109,7 +110,11 @@ export default function MobileDashboard({
                 key={a.slug}
                 account={a}
                 spent={spent}
-                budget={proratedBudget(a.monthly_budget || 0, period)}
+                budget={
+                  period.mode === "month"
+                    ? fundedForAccount(bucketMap[a.slug])
+                    : proratedBudget(a.monthly_budget || 0, period)
+                }
                 sparkValues={sparkValues}
                 dayOfMonth={pace.elapsed}
                 daysInMonth={pace.total}
