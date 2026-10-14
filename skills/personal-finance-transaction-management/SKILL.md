@@ -117,6 +117,15 @@ Rules auto-materialize lazily on the first API read of each month (transactions,
 Salary recurring rules trigger the full auto-distribution cascade.
 Day-of-month is clamped to the last day of the month (e.g. day 31 in February → day 28).
 
+## Transferring Between Accounts
+
+```bash
+python3 cli.py transfer --from food --to entertainment --amount 200000
+python3 cli.py transfer --from food --to savings --amount 500000 --date 2026-05-20
+```
+
+Writes an expense on the source and an income on the target (both auto-distribution rows), so balances move but income/expense totals don't. Transfers can't be edited; delete the source row (returned `id`) to undo — the target row is removed with it.
+
 ## Extending with New Query Types
 
 If the user asks for a query type not yet supported (e.g., "show by date range", "top 5 accounts"):

@@ -46,6 +46,51 @@ def insert_transaction(
         return txn_id, distributed
 
 
+def transfer(source_account: str, target_account: str, amount: float, date: str = None):
+    """
+    Move money from source_account to target_account. Writes an expense on the
+    source (the parent row) and a matching income on the target (its child),
+    both as auto-distribution rows: balances move, summary income/expense don't.
+    Deleting the source row deletes the pair.
+    """
+    if source_account == target_account:
+        raise ValueError("Source and target accounts must differ")
+    if amount <= 0:
+        raise ValueError("Amount must be positive")
+    if date is None:
+        date = datetime.now().strftime("%Y-%m-%d")
+    year_month = date[:7]
+
+    with get_connection() as conn:
+        for slug in (source_account, target_account):
+            if account_repo.get_by_slug(conn, slug) is None:
+                raise ValueError(f"Account not found: {slug}")
+
+        source_id = transaction_repo.insert(
+            conn,
+            amount=amount,
+            type="expense",
+            category=source_account,
+            subcategory=None,
+            note=transaction_repo.AUTO_DIST_NOTE,
+            date=date,
+        )
+        bucket_repo.apply_delta(conn, source_account, year_month, auto_dist_out=amount)
+        target_id = transaction_repo.insert(
+            conn,
+            amount=amount,
+            type="income",
+            category=target_account,
+            subcategory=None,
+            note=transaction_repo.AUTO_DIST_NOTE,
+            date=date,
+            parent_id=source_id,
+        )
+        bucket_repo.apply_delta(conn, target_account, year_month, auto_dist_in=amount)
+        conn.commit()
+        return {"id": source_id, "target_id": target_id}
+
+
 def delete_transaction(txn_id: int) -> bool:
     with get_connection() as conn:
         row = transaction_repo.get_by_id(conn, txn_id)
@@ -66,7 +111,10 @@ def delete_transaction(txn_id: int) -> bool:
         # auto-distribution (handled in the cascade above to avoid double-reversal).
         if row["parent_id"] is None:
             row_month = row["date"][:7]
-            if row["type"] == "income":
+            if row["note"] == transaction_repo.AUTO_DIST_NOTE:
+                # Transfer source row: recorded as auto-distribution out, not expense.
+                bucket_repo.apply_delta(conn, row["category"], row_month, auto_dist_out=-row["amount"])
+            elif row["type"] == "income":
                 bucket_repo.apply_delta(conn, row["category"], row_month, income=-row["amount"])
             else:
                 bucket_repo.apply_delta(conn, row["category"], row_month, expense=-row["amount"])
@@ -109,6 +157,8 @@ def update_transaction(txn_id: int, amount: float = None, note: str = None, date
 
         if row["parent_id"] is not None:
             raise ValueError("Cannot edit auto-distribution rows directly. Edit the parent salary transaction instead.")
+        if row["note"] == transaction_repo.AUTO_DIST_NOTE:
+            raise ValueError("Cannot edit a transfer. Delete it and create a new one.")
 
     new_date = date if date is not None else row["date"]
     amount_changed = amount is not None and amount != row["amount"]
