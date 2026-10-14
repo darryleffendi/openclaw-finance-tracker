@@ -91,4 +91,3 @@ export const deleteRecurring = (id) => sendJson("DELETE", `/recurring/${id}`)
 export const runRecurring = () => sendJson("POST", "/recurring/run")
 
 // ── Distribute ─────────────────────────────────────────────────────
-export const distribute = (body) => sendJson("POST", "/distribute", body)

@@ -9,7 +9,6 @@ from backend.repositories.transaction_repository import (
     get_transactions_by_period,
     get_transactions_by_range,
 )
-from backend.services.distribution_service import distribute_salary
 from backend.services.today_service import get_today
 from backend.services.recurring_service import (
     create_rule,
@@ -110,12 +109,6 @@ def main():
     rec_delete.add_argument("--id", type=int, required=True, help="Rule id")
 
     recurring_sub.add_parser("run", help="Force-materialize all enabled rules for the current month")
-
-    # Distribute
-    distribute_parser = subparsers.add_parser("distribute", help="Manually distribute funds to expense accounts")
-    distribute_parser.add_argument("--amount", type=float, required=True)
-    distribute_parser.add_argument("--from", dest="source_account", default="freelance",
-                                   help="Source account slug (default: freelance)")
 
     args = parser.parse_args()
 
@@ -248,10 +241,6 @@ def main():
         elif args.recurring_action == "run":
             results = run_now()
             print(json.dumps({"materialized": len(results), "transactions": results}, indent=2))
-
-    elif args.command == "distribute":
-        result = distribute_salary(args.amount, args.source_account)
-        print(json.dumps(result, indent=2))
 
 
 if __name__ == "__main__":

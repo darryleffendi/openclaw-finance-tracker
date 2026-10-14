@@ -66,10 +66,9 @@ Returns all accounts in display order. Also triggers lazy materialization of any
 
 | `type` | Meaning |
 |---|---|
-| `income` | Receives salary/freelance income |
+| `income` | Receives income. `salary` auto-distributes across expense/savings by budget; `other_income` transfers in full to `savings` |
 | `expense` | Regular spending category |
 | `savings` | Savings or investment account |
-| `holding` | Intermediate holding (freelance funds) |
 
 **`daily_budget_enabled`:** `1` = this account contributes to the Today's Allowance hero card; `0` = excluded. Currently `1` for: food, groceries, transport.
 
@@ -78,7 +77,7 @@ Returns all accounts in display order. Also triggers lazy materialization of any
 | slug | display_name | type |
 |---|---|---|
 | `salary` | Salary | income |
-| `freelance` | Freelance | holding |
+| `other_income` | Other Income | income |
 | `fixed` | Fixed Obligations | expense |
 | `food` | Food | expense |
 | `groceries` | Groceries & Personal Care | expense |
@@ -172,7 +171,6 @@ dashboard's period picker for single-date/week/custom-range selections.
 | `expense` | `bucket.balance` in month view (negative = overspent); `prorated monthly_budget − bucket.expense` for other ranges | `bucket.expense` |
 | `income` | `bucket.income` (received this month) | `bucket.income` |
 | `savings` | `bucket.income + bucket.auto_dist_in` (net deposits this month) | same |
-| `holding` | `bucket.balance` (received minus distributed onward) | same |
 
 **All-time savings total:** Sum `income + auto_dist_in` across all months for that slug.
 
@@ -265,7 +263,7 @@ List transactions. Also triggers lazy recurring materialization.
 ```
 
 **Special rows:**  
-Auto-distribution rows have `note = "auto-distribution from salary"`. These are internal transfers generated when a salary income is recorded. They should typically be displayed with a badge rather than as regular transactions, and cannot be edited directly via `PATCH`.
+Auto-distribution rows have `note = "auto-distribution"` and `parent_id` set to the income row that generated them. These are internal transfers generated when a `salary` or `other_income` income is recorded. They should typically be displayed with a badge rather than as regular transactions, and cannot be edited directly via `PATCH`.
 
 ---
 
@@ -348,7 +346,7 @@ Edit a transaction's `amount`, `note` and/or `date`. Type and category are immut
 ```
 
 **Errors:**
-- `400` — no fields supplied, malformed `date` (not `YYYY-MM-DD`), or row is an auto-distribution row (edit the parent salary transaction instead)
+- `400` — no fields supplied, malformed `date` (not `YYYY-MM-DD`), or row is an auto-distribution row (edit the parent transaction instead)
 - `404` — transaction not found
 
 ---
@@ -512,35 +510,6 @@ If a salary rule materializes, auto-distribution fires automatically (same as a 
 
 ---
 
-## Distribute (manual)
-
-### `POST /api/distribute`
-Manually distribute a lump sum across expense/savings accounts by budget proportions. Used for freelance income. Does **not** create an income row on the source account — call this after you've already recorded the freelance income transaction.
-
-**Request body:**
-```json
-{
-  "amount": 2000000,
-  "source_account": "freelance"
-}
-```
-
-`source_account` defaults to `"freelance"` if omitted.
-
-**Response** `201`:
-```json
-{
-  "source": "freelance",
-  "total": 2000000.0,
-  "distributions": [
-    { "account": "fixed", "amount": 351672 },
-    { "account": "food", "amount": 213395 }
-  ]
-}
-```
-
----
-
 ## Common error shapes
 
 All error responses have the same shape:
@@ -561,12 +530,13 @@ All error responses have the same shape:
 
 ### Balance / remaining — how to build each card
 
-**Expense category card:**
-- Remaining: `monthly_budget − bucket.expense` (can be negative = over budget)
+**Expense category card (month view):**
+- Remaining: `bucket.balance` (can be negative = overspent)
 - Spent: `bucket.expense`
-- Progress bar %: `bucket.expense / monthly_budget * 100`
+- Progress bar %: `bucket.expense / (bucket.income + bucket.auto_dist_in) * 100`
+- Other ranges fall back to the prorated `monthly_budget`.
 
-**Income category card (salary, freelance):**
+**Income category card (salary, other_income):**
 - Received this month: `bucket.income`
 - Compared against: `monthly_budget` (expected salary)
 
@@ -579,7 +549,7 @@ All error responses have the same shape:
 - Only accounts with `daily_budget_enabled = 1` appear in `breakdown`
 
 ### Salary auto-distribution badge
-Transactions where `note === "auto-distribution from salary"` are internal transfers, not real user expenses. Show them in the transaction list with a badge/indicator rather than as normal rows. They cannot be PATCH-edited — the parent salary row is the edit target.
+Transactions where `note === "auto-distribution"` are internal transfers, not real user expenses. Show them in the transaction list with a badge/indicator rather than as normal rows. They cannot be PATCH-edited — the parent row (`parent_id`) is the edit target. Deleting the parent deletes them too.
 
 ### Recurring transaction badge
 Transactions auto-created by recurring rules have their `note` prefixed with `"recurring: "` (e.g. `"recurring: Rent"`) unless the rule specifies a custom note.

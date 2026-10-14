@@ -186,7 +186,7 @@ Read every visible transaction. For each one, extract:
 | `date` | YYYY-MM-DD; if year missing, use current year |
 | `amount` | Numeric IDR value, no formatting |
 | `type` | `income` or `expense` |
-| `category` | Match to: food, groceries, transport, salary, freelance, bills, health, entertainment, shopping, savings, date, charity, other |
+| `category` | Match to: food, groceries, transport, salary, other_income, bills, health, entertainment, shopping, savings, date, charity, other |
 | `subcategory` | Optional |
 | `note` | Description/merchant name, optional |
 
@@ -259,7 +259,7 @@ cd ~/codespace/personal-finance-tracker && python3 cli.py query --period this-mo
 | shopping | clothes, electronics, tokopedia, shopee |
 | date | gifts, dinner |
 | charity | *(none)* — donations, zakat, giving to people |
-| groceries, salary, freelance, savings, other | *(none)* |
+| groceries, salary, other_income, savings, other | *(none)* |
 
 ## Response Format
 

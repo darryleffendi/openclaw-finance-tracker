@@ -1,6 +1,6 @@
 ---
 name: personal-finance-transaction-management
-description: Manage individual finance transactions one at a time. Use this skill when the user wants to record a single income or expense, query transactions, get summaries, manage account balances/budgets, distribute salary, manage recurring rules, check today's allowance, or when a new query type is needed that the CLI doesn't yet support. For bulk imports from Excel or image files, use the finance-bulk-import skill instead.
+description: Manage individual finance transactions one at a time. Use this skill when the user wants to record a single income or expense, query transactions, get summaries, manage account balances/budgets, manage recurring rules, check today's allowance, or when a new query type is needed that the CLI doesn't yet support. For bulk imports from Excel or image files, use the finance-bulk-import skill instead.
 ---
 
 # Personal Finance Transaction Management
@@ -26,7 +26,8 @@ python3 cli.py insert --amount 10000000 --type income --category salary --note "
 # ↑ Salary auto-distributes proportionally to all expense/savings accounts
 python3 cli.py insert --amount 120000 --type expense --category transport --subcategory flazz --date 2026-05-15
 python3 cli.py insert --amount 35000 --type expense --category groceries --note "alfamart"
-python3 cli.py insert --amount 2000000 --type income --category freelance --note "project payment"
+python3 cli.py insert --amount 2000000 --type income --category other_income --subcategory freelance --note "project payment"
+# ↑ Any non-salary income goes to other_income and is transferred in full to savings
 ```
 
 ## Editing a Transaction (amount and/or note only)
@@ -36,7 +37,7 @@ python3 cli.py edit --id <id> --amount <new_amount>
 python3 cli.py edit --id <id> --note "<new_note>"
 python3 cli.py edit --id <id> --amount <new_amount> --note "<new_note>"
 # Salary income: editing the amount re-runs the full distribution cascade (row id changes)
-# Auto-distribution rows cannot be edited directly — edit the parent salary row
+# Auto-distribution rows cannot be edited directly — edit the parent salary / other_income row
 ```
 
 ## Querying Transactions
@@ -87,7 +88,7 @@ python3 cli.py set-account --slug food --monthly-budget 2500000 --per-day-budget
 
 ```bash
 python3 cli.py delete --id <id>
-# If the deleted transaction is a salary income, its auto-distribution rows are also deleted
+# If the deleted transaction is a salary / other_income income, its auto-distribution rows are also deleted
 ```
 
 ## Recurring Transaction Rules
@@ -116,12 +117,6 @@ Rules auto-materialize lazily on the first API read of each month (transactions,
 Salary recurring rules trigger the full auto-distribution cascade.
 Day-of-month is clamped to the last day of the month (e.g. day 31 in February → day 28).
 
-## Distributing Salary / Freelance Income Manually
-
-```bash
-python3 cli.py distribute --amount 2000000 --from freelance
-```
-
 ## Extending with New Query Types
 
 If the user asks for a query type not yet supported (e.g., "show by date range", "top 5 accounts"):
@@ -142,7 +137,7 @@ Parse the JSON output and present it in a readable format. For summaries, show i
 | Slug | Display Name | Type |
 |------|-------------|------|
 | salary | Salary | income |
-| freelance | Freelance | holding |
+| other_income | Other Income | income |
 | fixed | Fixed Obligations | expense |
 | food | Food | expense |
 | groceries | Groceries & Personal Care | expense |

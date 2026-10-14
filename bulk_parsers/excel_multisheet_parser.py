@@ -18,7 +18,7 @@ CATEGORY_MAP = {
     'entertainment': 'entertainment',
     'shopping': 'shopping',
     'health': 'health',
-    'other revenue': 'freelance',
+    'other revenue': 'other_income',
     'other expenses': 'other',
     'groceries': 'groceries',
 }

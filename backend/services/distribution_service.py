@@ -1,6 +1,3 @@
-from datetime import datetime
-
-from backend.db import get_connection
 from backend.repositories import account_bucket_repository as bucket_repo
 from backend.repositories import account_repository as account_repo
 from backend.repositories import transaction_repository as transaction_repo
@@ -98,11 +95,3 @@ def transfer_within(conn, source_account: str, target_account: str, amount: floa
     bucket_repo.apply_delta(conn, source_account, year_month, auto_dist_out=amount)
     return [{"account": target_account, "amount": amount}]
 
-
-def distribute_salary(amount: float, source_account: str = "salary") -> dict:
-    """Manual distribution — for freelance or other income sources."""
-    date = datetime.now().strftime("%Y-%m-%d")
-    with get_connection() as conn:
-        distributed = distribute_within(conn, source_account, amount, date)
-        conn.commit()
-    return {"source": source_account, "total": amount, "distributions": distributed}

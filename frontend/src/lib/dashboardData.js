@@ -102,12 +102,10 @@ export function bucketsBySlug(bucketsResponse) {
 // - expense: bucket.expense
 // - income:  bucket.income
 // - savings: bucket.income + bucket.auto_dist_in
-// - holding: bucket.balance (received minus distributed onward)
 export function spentForAccount(account, bucket) {
   if (!bucket) return 0
   if (account.type === "expense") return bucket.expense || 0
   if (account.type === "income") return bucket.income || 0
-  if (account.type === "holding") return bucket.balance || 0
   return (bucket.income || 0) + (bucket.auto_dist_in || 0)
 }
 

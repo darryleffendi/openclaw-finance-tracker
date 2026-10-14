@@ -9,7 +9,6 @@ import Sparkline from "../ui/Sparkline"
 function accountTypeLabel(t) {
   if (t === "income") return "Income"
   if (t === "savings") return "Savings"
-  if (t === "holding") return "Holding"
   return "Expense"
 }
 
@@ -31,7 +30,6 @@ export default function AccountCard({
   const color = statusFor(remaining, Math.max(1, budget))
   const isIncome = account.type === "income"
   const isSavings = account.type === "savings"
-  const isHolding = account.type === "holding"
 
   let bigNumber, bigColor, bigLabel
   if (isIncome) {
@@ -41,12 +39,12 @@ export default function AccountCard({
   } else if (noBudget) {
     bigNumber = formatIDR(spent)
     bigColor = isSavings ? "var(--accent)" : TOKENS.fg
-    bigLabel = isSavings || isHolding ? "saved" : "spent"
+    bigLabel = isSavings ? "saved" : "spent"
   } else if (over) {
     bigNumber = `Over by ${formatIDR(Math.abs(remaining))}`
     bigColor = TOKENS.red
     bigLabel = `Spent ${formatIDR(spent)} of ${formatIDR(budget)}`
-  } else if (isSavings || isHolding) {
+  } else if (isSavings) {
     bigNumber = formatIDR(spent)
     bigColor = isSavings ? "var(--accent)" : TOKENS.fg
     bigLabel = `${formatIDR(budget)} target`
@@ -57,7 +55,7 @@ export default function AccountCard({
   }
 
   const showSpark =
-    !isIncome && !isSavings && !isHolding && sparkValues && sparkValues.length > 1
+    !isIncome && !isSavings && sparkValues && sparkValues.length > 1
   const showProgress = !isIncome && !noBudget
 
   return (
