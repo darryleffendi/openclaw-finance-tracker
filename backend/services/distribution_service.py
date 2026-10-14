@@ -44,7 +44,7 @@ def distribute_within(conn, source_account: str, amount: float, date: str, paren
             type="income",
             category=target["slug"],
             subcategory=None,
-            note="auto-distribution from salary",
+            note=transaction_repo.AUTO_DIST_NOTE,
             date=date,
             parent_id=parent_id,
         )
@@ -59,13 +59,44 @@ def distribute_within(conn, source_account: str, amount: float, date: str, paren
             type="expense",
             category=source_account,
             subcategory=None,
-            note="auto-distribution from salary",
+            note=transaction_repo.AUTO_DIST_NOTE,
             date=date,
             parent_id=parent_id,
         )
         bucket_repo.apply_delta(conn, source_account, year_month, auto_dist_out=total_distributed)
 
     return distributed
+
+
+def transfer_within(conn, source_account: str, target_account: str, amount: float, date: str, parent_id=None):
+    """
+    Move the full amount from source_account to target_account, using the same
+    income/expense row pair as distribute_within. Does not commit.
+    """
+    year_month = date[:7]
+    transaction_repo.insert(
+        conn,
+        amount=amount,
+        type="income",
+        category=target_account,
+        subcategory=None,
+        note=transaction_repo.AUTO_DIST_NOTE,
+        date=date,
+        parent_id=parent_id,
+    )
+    bucket_repo.apply_delta(conn, target_account, year_month, auto_dist_in=amount)
+    transaction_repo.insert(
+        conn,
+        amount=amount,
+        type="expense",
+        category=source_account,
+        subcategory=None,
+        note=transaction_repo.AUTO_DIST_NOTE,
+        date=date,
+        parent_id=parent_id,
+    )
+    bucket_repo.apply_delta(conn, source_account, year_month, auto_dist_out=amount)
+    return [{"account": target_account, "amount": amount}]
 
 
 def distribute_salary(amount: float, source_account: str = "salary") -> dict:

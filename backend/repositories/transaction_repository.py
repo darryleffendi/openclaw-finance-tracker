@@ -1,6 +1,6 @@
 from backend.db import get_connection
 
-AUTO_DIST_NOTE = "auto-distribution from salary"
+AUTO_DIST_NOTE = "auto-distribution"
 
 
 # ── Operations that take a caller-supplied connection ──────────────────────

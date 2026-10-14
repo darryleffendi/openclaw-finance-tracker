@@ -46,7 +46,7 @@ export default function CategoryDetail({
   const visibleTxs = useMemo(
     () =>
       (txs || []).filter(
-        (t) => t.note !== "auto-distribution from salary"
+        (t) => t.note !== "auto-distribution"
       ),
     [txs]
   )

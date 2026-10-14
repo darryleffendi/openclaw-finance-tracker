@@ -83,7 +83,7 @@ export function sumSpentToday(transactions, accounts) {
       (t) =>
         t.date === today &&
         t.type === "expense" &&
-        t.note !== "auto-distribution from salary" &&
+        t.note !== "auto-distribution" &&
         (!dailySlugs || dailySlugs.has(t.category))
     )
     .reduce((s, t) => s + t.amount, 0)
@@ -130,7 +130,7 @@ export function buildSparkline(transactions, categorySlug, days = 12) {
   for (const t of transactions) {
     if (t.category !== categorySlug) continue
     if (t.type !== "expense") continue
-    if (t.note === "auto-distribution from salary") continue
+    if (t.note === "auto-distribution") continue
     const d = new Date(t.date)
     const idx = Math.floor((d - start) / 86_400_000)
     if (idx >= 0 && idx < days) byDay[idx] += t.amount

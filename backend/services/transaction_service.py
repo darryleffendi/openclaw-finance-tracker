@@ -4,7 +4,7 @@ from backend.db import get_connection
 from backend.repositories import account_bucket_repository as bucket_repo
 from backend.repositories import account_repository as account_repo
 from backend.repositories import transaction_repository as transaction_repo
-from backend.services.distribution_service import distribute_within
+from backend.services.distribution_service import distribute_within, transfer_within
 
 
 def insert_transaction(
@@ -39,6 +39,8 @@ def insert_transaction(
                 bucket_repo.apply_delta(conn, category, year_month, expense=amount)
             if category == "salary" and type == "income":
                 distributed = distribute_within(conn, "salary", amount, date, parent_id=txn_id)
+            elif category == "other_income" and type == "income":
+                distributed = transfer_within(conn, "other_income", "savings", amount, date, parent_id=txn_id)
 
         conn.commit()
         return txn_id, distributed
@@ -81,8 +83,8 @@ def update_transaction(txn_id: int, amount: float = None, note: str = None, date
     Auto-distribution rows (parent_id set) cannot be edited directly — edit
     the parent salary row instead.
 
-    For salary income rows: an amount or date change uses delete-and-reinsert to
-    correctly re-run the salary cascade at the (possibly new) date. The returned
+    For salary / other_income income rows: an amount or date change uses
+    delete-and-reinsert to correctly re-run the cascade at the (possibly new) date. The returned
     new_id replaces the old id.
 
     A date change that crosses a month boundary moves the transaction's bucket
@@ -113,8 +115,8 @@ def update_transaction(txn_id: int, amount: float = None, note: str = None, date
     date_changed = date is not None and date != row["date"]
     month_changed = date_changed and new_date[:7] != row["date"][:7]
 
-    # Salary amount or date change: cascade-delete old + reinsert at new date
-    if (amount_changed or date_changed) and row["category"] == "salary" and row["type"] == "income":
+    # Salary / other_income amount or date change: cascade-delete old + reinsert at new date
+    if (amount_changed or date_changed) and row["category"] in ("salary", "other_income") and row["type"] == "income":
         delete_transaction(txn_id)
         new_id, distributed = insert_transaction(
             amount=amount if amount is not None else row["amount"],

@@ -27,7 +27,7 @@ export default function EditTransactionSheet({ tx, accounts, onClose, onSaved })
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState(null)
 
-  const isAutoDistRow = tx.note === "auto-distribution from salary"
+  const isAutoDistRow = tx.note === "auto-distribution"
   const isSalary = tx.category === "salary" && tx.type === "income"
   const isRecurringRow = tx.note && tx.note.startsWith("recurring:")
 

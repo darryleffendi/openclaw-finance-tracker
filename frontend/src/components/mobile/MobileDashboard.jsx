@@ -71,7 +71,7 @@ export default function MobileDashboard({
   const pace = rangePace(period, today?.date || ymdToday())
 
   const visibleTxs = (transactions || []).filter(
-    (t) => t.note !== "auto-distribution from salary"
+    (t) => t.note !== "auto-distribution"
   )
   const filteredTxs =
     filter === "all" ? visibleTxs : visibleTxs.filter((t) => t.category === filter)
