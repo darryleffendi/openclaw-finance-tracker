@@ -1,6 +1,6 @@
 ---
 name: personal-finance-transaction-management
-description: Manage individual finance transactions one at a time. Use this skill when the user wants to record a single income or expense, query transactions, get summaries, manage account balances/budgets, manage recurring rules, check today's allowance, or when a new query type is needed that the CLI doesn't yet support. For bulk imports from Excel or image files, use the finance-bulk-import skill instead.
+description: Manage individual finance transactions one at a time. Use this skill when the user wants to record a single income or expense, query transactions, get summaries, manage account balances/budgets, manage recurring rules, check today's allowance, or when a new query type is needed that the CLI doesn't yet support.
 ---
 
 # Personal Finance Transaction Management
@@ -36,7 +36,7 @@ python3 cli.py insert --amount 2000000 --type income --category other_income --s
 python3 cli.py edit --id <id> --amount <new_amount>
 python3 cli.py edit --id <id> --note "<new_note>"
 python3 cli.py edit --id <id> --amount <new_amount> --note "<new_note>"
-# Salary income: editing the amount re-runs the full distribution cascade (row id changes)
+# Salary / other_income income: editing the amount re-runs the full distribution cascade (row id changes)
 # Auto-distribution rows cannot be edited directly — edit the parent salary / other_income row
 ```
 
@@ -51,6 +51,10 @@ python3 cli.py query --period this-week
 python3 cli.py query --period this-month
 python3 cli.py query --period last-month
 python3 cli.py query --period all
+
+# By date range (overrides --period)
+python3 cli.py query --start 2026-10-01 --end 2026-10-15
+python3 cli.py query --start 2026-10-01 --end 2026-10-15 --summary
 
 # By account
 python3 cli.py query --category food
@@ -78,9 +82,9 @@ python3 cli.py accounts
 
 ```bash
 python3 cli.py set-account --slug food --monthly-budget 2500000
-python3 cli.py set-account --slug food --per-day-budget 1
+python3 cli.py set-account --slug food --daily-budget-enabled 1
 python3 cli.py set-account --slug food --subcategories "dine,gofood,grabfood,snack"
-python3 cli.py set-account --slug food --monthly-budget 2500000 --per-day-budget 1 --subcategories "dine,gofood"
+python3 cli.py set-account --slug food --monthly-budget 2500000 --daily-budget-enabled 1 --subcategories "dine,gofood"
 # Accepts any subset of the above flags; updates only what is provided
 ```
 
@@ -170,10 +174,10 @@ Parse the JSON output and present it in a readable format. For summaries, show i
 
 ### Subcategories
 
-- **fixed**: rent, electricity, subscriptions
+- **fixed**: rent, subscriptions
 - **food**: dine, gofood, snack
 - **transport**: gopay, ovo, flazz
-- **wellness**: haircut, medicine, nutrition
+- **wellness**: haircut, medicine, supplements
 - **entertainment**: hobbies, social, shopping
 - **date**: gifts, dinner (anything spent on/for a date)
 - **charity**: anything given to people (donations, zakat, helping others)
