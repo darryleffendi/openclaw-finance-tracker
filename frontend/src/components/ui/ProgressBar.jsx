@@ -7,13 +7,14 @@ export default function ProgressBar({
   height = 6,
   dayOfMonth,
   daysInMonth,
+  color: colorProp,
 }) {
   const safeBudget = Math.max(1, budget)
   const over = spent > budget
   const pct = Math.min(1, spent / safeBudget)
   const overPct = over ? Math.min(1, (spent - safeBudget) / safeBudget) : 0
   const remaining = budget - spent
-  const color = statusFor(remaining, safeBudget)
+  const color = colorProp || statusFor(remaining, safeBudget)
   const idealPct =
     dayOfMonth && daysInMonth ? Math.min(1, dayOfMonth / daysInMonth) : null
 

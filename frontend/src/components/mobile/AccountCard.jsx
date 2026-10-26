@@ -9,7 +9,6 @@ import Sparkline from "../ui/Sparkline"
 function accountTypeLabel(t) {
   if (t === "income") return "Income"
   if (t === "savings") return "Savings"
-  if (t === "holding") return "Holding"
   return "Expense"
 }
 
@@ -22,16 +21,19 @@ export default function AccountCard({
   daysInMonth,
   onTap,
   recurring,
+  settleIn = 0,
+  settleOut = 0,
 }) {
   // budgetProp is the period-prorated budget; null = no budget framing (all time).
   const noBudget = budgetProp === null
   const budget = budgetProp === undefined ? account.monthly_budget || 0 : budgetProp || 0
-  const remaining = budget - spent
-  const over = remaining < 0
-  const color = statusFor(remaining, Math.max(1, budget))
   const isIncome = account.type === "income"
   const isSavings = account.type === "savings"
-  const isHolding = account.type === "holding"
+  const remaining = budget - spent
+  // Savings flip the framing: reaching the target is good, falling short is bad.
+  const over = !isSavings && remaining < 0
+  const savingsColor = spent >= budget ? TOKENS.green : TOKENS.red
+  const color = isSavings ? savingsColor : statusFor(remaining, Math.max(1, budget))
 
   let bigNumber, bigColor, bigLabel
   if (isIncome) {
@@ -41,15 +43,17 @@ export default function AccountCard({
   } else if (noBudget) {
     bigNumber = formatIDR(spent)
     bigColor = isSavings ? "var(--accent)" : TOKENS.fg
-    bigLabel = isSavings || isHolding ? "saved" : "spent"
+    bigLabel = isSavings ? "saved" : "spent"
+  } else if (isSavings) {
+    bigNumber = `${formatIDR(spent)} saved`
+    bigColor = savingsColor
+    bigLabel = spent > budget
+      ? `+${formatIDR(spent - budget)} above ${formatIDR(budget)} target`
+      : `of ${formatIDR(budget)} target`
   } else if (over) {
     bigNumber = `Over by ${formatIDR(Math.abs(remaining))}`
     bigColor = TOKENS.red
     bigLabel = `Spent ${formatIDR(spent)} of ${formatIDR(budget)}`
-  } else if (isSavings || isHolding) {
-    bigNumber = formatIDR(spent)
-    bigColor = isSavings ? "var(--accent)" : TOKENS.fg
-    bigLabel = `${formatIDR(budget)} target`
   } else {
     bigNumber = `${formatIDR(remaining)} left`
     bigColor = TOKENS.fg
@@ -57,7 +61,7 @@ export default function AccountCard({
   }
 
   const showSpark =
-    !isIncome && !isSavings && !isHolding && sparkValues && sparkValues.length > 1
+    !isIncome && !isSavings && sparkValues && sparkValues.length > 1
   const showProgress = !isIncome && !noBudget
 
   return (
@@ -101,13 +105,29 @@ export default function AccountCard({
       <div className="text-[11.5px] text-fg-muted mb-2.5">
         {bigLabel}
       </div>
+      {(settleIn > 0 || settleOut > 0) && (
+        <div className="text-[11px] text-fg-dim -mt-1.5 mb-2.5">
+          {settleIn > 0
+            ? `Covered at month-end · ${formatIDR(settleIn)}`
+            : `Moved to savings · ${formatIDR(settleOut)}`}
+        </div>
+      )}
       {showProgress && (
-        <ProgressBar
-          spent={spent}
-          budget={budget}
-          dayOfMonth={dayOfMonth}
-          daysInMonth={daysInMonth}
-        />
+        isSavings ? (
+          // Savings arrive as a lump on payday, so no pace tick or overflow.
+          <ProgressBar
+            spent={Math.max(0, Math.min(spent, budget))}
+            budget={budget}
+            color={savingsColor}
+          />
+        ) : (
+          <ProgressBar
+            spent={spent}
+            budget={budget}
+            dayOfMonth={dayOfMonth}
+            daysInMonth={daysInMonth}
+          />
+        )
       )}
     </Card>
   )

@@ -182,7 +182,7 @@ export const Icon = {
 
 export const ACCOUNT_ICON = {
   salary: Icon.Coin,
-  freelance: Icon.Trend,
+  other_income: Icon.Trend,
   fixed: Icon.Home,
   food: Icon.Fork,
   groceries: Icon.Cart,

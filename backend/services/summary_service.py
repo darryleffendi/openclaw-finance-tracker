@@ -7,7 +7,7 @@ from backend.repositories.transaction_repository import (
     get_transactions_by_range,
 )
 
-AUTO_DIST_NOTE = "auto-distribution from salary"
+AUTO_DIST_NOTE = "auto-distribution"
 
 
 def _month_for_period(period):

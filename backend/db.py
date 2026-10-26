@@ -34,6 +34,8 @@ def init_db():
                 created_at  TEXT DEFAULT (datetime('now'))
             )
         """)
+        # Auto-distribution rows point at the income row that generated them.
+        _ensure_column(conn, "transactions", "parent_id", "INTEGER REFERENCES transactions(id)")
         conn.execute("""
             CREATE TABLE IF NOT EXISTS accounts (
                 slug           TEXT    PRIMARY KEY NOT NULL,
@@ -65,6 +67,10 @@ def init_db():
                 FOREIGN KEY (slug) REFERENCES accounts(slug)
             )
         """)
+        # Month-end settlement transfers, kept apart from auto_dist_* so funding
+        # and after-the-fact cover can be told apart.
+        _ensure_column(conn, "account_buckets", "settle_in", "REAL NOT NULL DEFAULT 0")
+        _ensure_column(conn, "account_buckets", "settle_out", "REAL NOT NULL DEFAULT 0")
         conn.execute("""
             CREATE TABLE IF NOT EXISTS recurring_transactions (
                 id              INTEGER PRIMARY KEY AUTOINCREMENT,

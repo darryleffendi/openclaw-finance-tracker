@@ -5,6 +5,7 @@ import { formatIDR, formatIDRShort } from "../../lib/format"
 import {
   bucketsBySlug,
   buildSparkline,
+  fundedForAccount,
   spentForAccount,
   sumSpentToday,
 } from "../../lib/dashboardData"
@@ -89,7 +90,7 @@ export default function DesktopDashboard({
   const pace = rangePace(period, today?.date || ymdToday())
 
   const visibleTxs = (transactions || []).filter(
-    (t) => t.note !== "auto-distribution from salary"
+    (t) => t.note !== "auto-distribution"
   )
   const filteredTxs =
     filter === "all" ? visibleTxs : visibleTxs.filter((t) => t.category === filter)
@@ -180,8 +181,14 @@ export default function DesktopDashboard({
                     key={a.slug}
                     account={a}
                     spent={spent}
-                    budget={proratedBudget(a.monthly_budget || 0, period)}
+                    budget={
+                      period.mode === "month"
+                        ? fundedForAccount(bucketMap[a.slug])
+                        : proratedBudget(a.monthly_budget || 0, period)
+                    }
                     sparkValues={sparkValues}
+                    settleIn={bucketMap[a.slug]?.settle_in}
+                    settleOut={bucketMap[a.slug]?.settle_out}
                     dayOfMonth={pace.elapsed}
                     daysInMonth={pace.total}
                     onTap={() => onAccountTap && onAccountTap(a.slug)}

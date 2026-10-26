@@ -16,9 +16,9 @@ ACCOUNTS = [
         "sort_order": 1,
     },
     {
-        "slug": "freelance",
-        "display_name": "Freelance",
-        "type": "holding",
+        "slug": "other_income",
+        "display_name": "Other Income",
+        "type": "income",
         "monthly_budget": 0,
         "daily_budget_enabled": 0,
         "subcategories": [],

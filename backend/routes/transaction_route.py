@@ -31,14 +31,17 @@ def list_transactions():
 @login_required
 def create_transaction():
     data = request.json
-    txn_id, distributed = insert_transaction(
-        amount=data["amount"],
-        type=data["type"],
-        category=data["category"],
-        subcategory=data.get("subcategory"),
-        note=data.get("note"),
-        date=data.get("date"),
-    )
+    try:
+        txn_id, distributed = insert_transaction(
+            amount=data["amount"],
+            type=data["type"],
+            category=data["category"],
+            subcategory=data.get("subcategory"),
+            note=data.get("note"),
+            date=data.get("date"),
+        )
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 400
     result = {"success": True, "id": txn_id}
     if distributed:
         result["distributions"] = distributed

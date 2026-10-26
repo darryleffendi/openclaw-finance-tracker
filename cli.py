@@ -9,8 +9,8 @@ from backend.repositories.transaction_repository import (
     get_transactions_by_period,
     get_transactions_by_range,
 )
-from backend.services.distribution_service import distribute_salary
 from backend.services.today_service import get_today
+from backend.services.settlement_service import settle, unsettle
 from backend.services.recurring_service import (
     create_rule,
     delete_rule,
@@ -20,7 +20,7 @@ from backend.services.recurring_service import (
     update_rule,
 )
 from backend.services.summary_service import get_summary, get_summary_range
-from backend.services.transaction_service import delete_transaction, insert_transaction, update_transaction
+from backend.services.transaction_service import delete_transaction, insert_transaction, transfer, update_transaction
 
 
 def main():
@@ -57,6 +57,19 @@ def main():
     edit_parser.add_argument("--id", type=int, required=True, help="Transaction id")
     edit_parser.add_argument("--amount", type=float, default=None, help="New amount in IDR")
     edit_parser.add_argument("--note", default=None, help="New note")
+
+    # Transfer
+    transfer_parser = subparsers.add_parser("transfer", help="Move money from one account to another")
+    transfer_parser.add_argument("--from", dest="source_account", required=True, help="Source account slug")
+    transfer_parser.add_argument("--to", dest="target_account", required=True, help="Target account slug")
+    transfer_parser.add_argument("--amount", type=float, required=True)
+    transfer_parser.add_argument("--date", default=None, help="YYYY-MM-DD, defaults to today")
+
+    # Settle
+    settle_parser = subparsers.add_parser("settle", help="Settle a month: zero expense balances via savings/investments")
+    settle_parser.add_argument("--month", required=True, help="YYYY-MM")
+    settle_parser.add_argument("--force", action="store_true", help="Allow settling the current (unfinished) month")
+    settle_parser.add_argument("--undo", action="store_true", help="Remove the month's settlement transfers")
 
     # Accounts
     subparsers.add_parser("accounts", help="List all accounts with balances")
@@ -111,23 +124,21 @@ def main():
 
     recurring_sub.add_parser("run", help="Force-materialize all enabled rules for the current month")
 
-    # Distribute
-    distribute_parser = subparsers.add_parser("distribute", help="Manually distribute funds to expense accounts")
-    distribute_parser.add_argument("--amount", type=float, required=True)
-    distribute_parser.add_argument("--from", dest="source_account", default="freelance",
-                                   help="Source account slug (default: freelance)")
-
     args = parser.parse_args()
 
     if args.command == "insert":
-        txn_id, distributed = insert_transaction(
-            amount=args.amount,
-            type=args.type,
-            category=args.category,
-            subcategory=args.subcategory,
-            note=args.note,
-            date=args.date,
-        )
+        try:
+            txn_id, distributed = insert_transaction(
+                amount=args.amount,
+                type=args.type,
+                category=args.category,
+                subcategory=args.subcategory,
+                note=args.note,
+                date=args.date,
+            )
+        except ValueError as e:
+            print(json.dumps({"success": False, "error": str(e)}))
+            sys.exit(1)
         result = {"success": True, "id": txn_id}
         if distributed:
             result["distributions"] = distributed
@@ -164,6 +175,22 @@ def main():
             print(json.dumps({"success": False, "error": "Transaction not found"}))
             sys.exit(1)
         print(json.dumps({"success": True, **result}))
+
+    elif args.command == "transfer":
+        try:
+            result = transfer(args.source_account, args.target_account, args.amount, args.date)
+        except ValueError as e:
+            print(json.dumps({"success": False, "error": str(e)}))
+            sys.exit(1)
+        print(json.dumps({"success": True, **result}))
+
+    elif args.command == "settle":
+        try:
+            result = unsettle(args.month) if args.undo else settle(args.month, force=args.force)
+        except ValueError as e:
+            print(json.dumps({"success": False, "error": str(e)}))
+            sys.exit(1)
+        print(json.dumps({"success": True, **result}, indent=2))
 
     elif args.command in ("accounts", "categories"):
         if args.command == "categories":
@@ -248,10 +275,6 @@ def main():
         elif args.recurring_action == "run":
             results = run_now()
             print(json.dumps({"materialized": len(results), "transactions": results}, indent=2))
-
-    elif args.command == "distribute":
-        result = distribute_salary(args.amount, args.source_account)
-        print(json.dumps(result, indent=2))
 
 
 if __name__ == "__main__":

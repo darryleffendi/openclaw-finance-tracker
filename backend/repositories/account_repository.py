@@ -14,6 +14,13 @@ def get_by_slug(conn, slug):
     ).fetchone()
 
 
+def get_slugs_by_type(conn, type):
+    rows = conn.execute(
+        "SELECT slug FROM accounts WHERE type = ? ORDER BY sort_order ASC", (type,)
+    ).fetchall()
+    return [r["slug"] for r in rows]
+
+
 def get_distribution_targets(conn):
     return conn.execute(
         """

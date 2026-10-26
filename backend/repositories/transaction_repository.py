@@ -1,16 +1,18 @@
 from backend.db import get_connection
 
-AUTO_DIST_NOTE = "auto-distribution from salary"
+AUTO_DIST_NOTE = "auto-distribution"
+# Auto-distribution rows written by month-end settlement carry this subcategory.
+SETTLEMENT_SUBCATEGORY = "settlement"
 
 
 # ── Operations that take a caller-supplied connection ──────────────────────
 # Used by services that compose multiple writes into one transaction.
 
-def insert(conn, *, amount, type, category, subcategory, note, date):
+def insert(conn, *, amount, type, category, subcategory, note, date, parent_id=None):
     cursor = conn.execute(
-        "INSERT INTO transactions (date, amount, type, category, subcategory, note) "
-        "VALUES (?, ?, ?, ?, ?, ?)",
-        (date, amount, type, category, subcategory, note),
+        "INSERT INTO transactions (date, amount, type, category, subcategory, note, parent_id) "
+        "VALUES (?, ?, ?, ?, ?, ?, ?)",
+        (date, amount, type, category, subcategory, note, parent_id),
     )
     return cursor.lastrowid
 
@@ -29,11 +31,19 @@ def update_note(conn, txn_id, note):
     conn.execute("UPDATE transactions SET note = ? WHERE id = ?", (note, txn_id))
 
 
-def find_salary_distributions(conn, date):
+def find_children(conn, parent_id):
     return conn.execute(
-        "SELECT id, amount, type, category FROM transactions "
-        "WHERE note = 'auto-distribution from salary' AND date = ?",
-        (date,),
+        "SELECT id, amount, type, category, subcategory, date FROM transactions WHERE parent_id = ?",
+        (parent_id,),
+    ).fetchall()
+
+
+def find_settlement_sources(conn, year_month):
+    """Parent rows of a month's settlement transfers (deleting them undoes the month)."""
+    return conn.execute(
+        "SELECT id FROM transactions WHERE subcategory = ? AND parent_id IS NULL AND note = ? "
+        "AND strftime('%Y-%m', date) = ?",
+        (SETTLEMENT_SUBCATEGORY, AUTO_DIST_NOTE, year_month),
     ).fetchall()
 
 
@@ -84,6 +94,7 @@ def aggregate_accounts_by_range(start, end):
     (not =/!=) so NULL-note rows compare correctly."""
     clause, params = _range_clause(start, end)
     params["ad"] = AUTO_DIST_NOTE
+    params["st"] = SETTLEMENT_SUBCATEGORY
     with get_connection() as conn:
         rows = conn.execute(
             f"""
@@ -91,8 +102,11 @@ def aggregate_accounts_by_range(start, end):
                 category AS slug,
                 COALESCE(SUM(CASE WHEN type='income'  AND note IS NOT :ad THEN amount ELSE 0 END), 0) AS income,
                 COALESCE(SUM(CASE WHEN type='expense' AND note IS NOT :ad THEN amount ELSE 0 END), 0) AS expense,
-                COALESCE(SUM(CASE WHEN type='income'  AND note IS     :ad THEN amount ELSE 0 END), 0) AS auto_dist_in,
-                COALESCE(SUM(CASE WHEN type='expense' AND note IS     :ad THEN amount ELSE 0 END), 0) AS auto_dist_out
+                COALESCE(SUM(CASE WHEN type='income'  AND note IS     :ad AND subcategory IS NOT :st THEN amount ELSE 0 END), 0) AS auto_dist_in,
+                COALESCE(SUM(CASE WHEN type='expense' AND note IS     :ad AND subcategory IS NOT :st THEN amount ELSE 0 END), 0) AS auto_dist_out,
+                COALESCE(SUM(CASE WHEN type='income'  AND note IS     :ad AND subcategory IS     :st THEN amount ELSE 0 END), 0) AS settle_in,
+                COALESCE(SUM(CASE WHEN type='expense' AND note IS     :ad AND subcategory IS     :st THEN amount ELSE 0 END), 0) AS settle_out,
+                COALESCE(SUM(CASE WHEN type='income' THEN amount ELSE -amount END), 0) AS balance
             FROM transactions
             {clause}
             GROUP BY category

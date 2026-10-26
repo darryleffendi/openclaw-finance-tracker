@@ -1,12 +1,9 @@
-from datetime import datetime
-
-from backend.db import get_connection
 from backend.repositories import account_bucket_repository as bucket_repo
 from backend.repositories import account_repository as account_repo
 from backend.repositories import transaction_repository as transaction_repo
 
 
-def distribute_within(conn, source_account: str, amount: float, date: str):
+def distribute_within(conn, source_account: str, amount: float, date: str, parent_id=None):
     """
     Distribute a deposit across all expense/savings accounts in proportion
     to their monthly_budget. Operates on the caller's open connection — does
@@ -15,6 +12,7 @@ def distribute_within(conn, source_account: str, amount: float, date: str):
     Inserts one income row per target (for the audit trail) and one matching
     expense row on source_account for the total distributed, so the balance
     invariant `balance == sum(signed txn amounts)` holds on every account.
+    All inserted rows carry parent_id so deleting the parent cascades to them.
     """
     targets = account_repo.get_distribution_targets(conn)
 
@@ -43,8 +41,9 @@ def distribute_within(conn, source_account: str, amount: float, date: str):
             type="income",
             category=target["slug"],
             subcategory=None,
-            note="auto-distribution from salary",
+            note=transaction_repo.AUTO_DIST_NOTE,
             date=date,
+            parent_id=parent_id,
         )
         bucket_repo.apply_delta(conn, target["slug"], year_month, auto_dist_in=share)
         distributed.append({"account": target["slug"], "amount": share})
@@ -57,18 +56,42 @@ def distribute_within(conn, source_account: str, amount: float, date: str):
             type="expense",
             category=source_account,
             subcategory=None,
-            note="auto-distribution from salary",
+            note=transaction_repo.AUTO_DIST_NOTE,
             date=date,
+            parent_id=parent_id,
         )
         bucket_repo.apply_delta(conn, source_account, year_month, auto_dist_out=total_distributed)
 
     return distributed
 
 
-def distribute_salary(amount: float, source_account: str = "salary") -> dict:
-    """Manual distribution — for freelance or other income sources."""
-    date = datetime.now().strftime("%Y-%m-%d")
-    with get_connection() as conn:
-        distributed = distribute_within(conn, source_account, amount, date)
-        conn.commit()
-    return {"source": source_account, "total": amount, "distributions": distributed}
+def transfer_within(conn, source_account: str, target_account: str, amount: float, date: str, parent_id=None):
+    """
+    Move the full amount from source_account to target_account, using the same
+    income/expense row pair as distribute_within. Does not commit.
+    """
+    year_month = date[:7]
+    transaction_repo.insert(
+        conn,
+        amount=amount,
+        type="income",
+        category=target_account,
+        subcategory=None,
+        note=transaction_repo.AUTO_DIST_NOTE,
+        date=date,
+        parent_id=parent_id,
+    )
+    bucket_repo.apply_delta(conn, target_account, year_month, auto_dist_in=amount)
+    transaction_repo.insert(
+        conn,
+        amount=amount,
+        type="expense",
+        category=source_account,
+        subcategory=None,
+        note=transaction_repo.AUTO_DIST_NOTE,
+        date=date,
+        parent_id=parent_id,
+    )
+    bucket_repo.apply_delta(conn, source_account, year_month, auto_dist_out=amount)
+    return [{"account": target_account, "amount": amount}]
+

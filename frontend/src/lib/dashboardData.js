@@ -83,7 +83,7 @@ export function sumSpentToday(transactions, accounts) {
       (t) =>
         t.date === today &&
         t.type === "expense" &&
-        t.note !== "auto-distribution from salary" &&
+        t.note !== "auto-distribution" &&
         (!dailySlugs || dailySlugs.has(t.category))
     )
     .reduce((s, t) => s + t.amount, 0)
@@ -101,12 +101,18 @@ export function bucketsBySlug(bucketsResponse) {
 // Derive "spent this month" for an account.
 // - expense: bucket.expense
 // - income:  bucket.income
-// - savings: bucket.income + bucket.auto_dist_in
-// - holding: bucket.income + bucket.auto_dist_in
+// - savings: bucket.balance (deposits minus settlement withdrawals)
 export function spentForAccount(account, bucket) {
   if (!bucket) return 0
   if (account.type === "expense") return bucket.expense || 0
   if (account.type === "income") return bucket.income || 0
+  return bucket.balance || 0
+}
+
+// Money actually put into an account this month (income + auto-distribution in).
+// Used as an expense card's target in month view, so remaining = bucket.balance.
+export function fundedForAccount(bucket) {
+  if (!bucket) return 0
   return (bucket.income || 0) + (bucket.auto_dist_in || 0)
 }
 
@@ -122,7 +128,7 @@ export function buildSparkline(transactions, categorySlug, days = 12) {
   for (const t of transactions) {
     if (t.category !== categorySlug) continue
     if (t.type !== "expense") continue
-    if (t.note === "auto-distribution from salary") continue
+    if (t.note === "auto-distribution") continue
     const d = new Date(t.date)
     const idx = Math.floor((d - start) / 86_400_000)
     if (idx >= 0 && idx < days) byDay[idx] += t.amount

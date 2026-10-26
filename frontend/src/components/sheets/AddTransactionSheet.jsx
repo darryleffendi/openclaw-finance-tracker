@@ -198,6 +198,12 @@ export default function AddTransactionSheet({ accounts, onClose, onAdded }) {
             {formatIDR(numericAmount)} across expense and savings accounts.
           </div>
         )}
+
+        {category === "other_income" && type === "income" && (
+          <div className="py-2.5 px-3 bg-accent-soft border border-accent-glow rounded-[10px] text-[12px] text-accent leading-[1.4]">
+            Adding other income will transfer {formatIDR(numericAmount)} to Savings.
+          </div>
+        )}
       </div>
 
       {openPicker === "category" && (
