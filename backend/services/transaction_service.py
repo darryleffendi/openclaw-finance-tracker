@@ -26,6 +26,9 @@ def insert_transaction(
     year_month = date[:7]
 
     with get_connection() as conn:
+        if account_repo.get_by_slug(conn, category) is None:
+            raise ValueError(f"Account not found: {category}")
+
         txn_id = transaction_repo.insert(
             conn,
             amount=amount,
@@ -36,17 +39,15 @@ def insert_transaction(
             date=date,
         )
 
-        acct = account_repo.get_by_slug(conn, category)
         distributed = []
-        if acct:
-            if type == "income":
-                bucket_repo.apply_delta(conn, category, year_month, income=amount)
-            else:
-                bucket_repo.apply_delta(conn, category, year_month, expense=amount)
-            if category == "salary" and type == "income":
-                distributed = distribute_within(conn, "salary", amount, date, parent_id=txn_id)
-            elif category == "other_income" and type == "income":
-                distributed = transfer_within(conn, "other_income", "savings", amount, date, parent_id=txn_id)
+        if type == "income":
+            bucket_repo.apply_delta(conn, category, year_month, income=amount)
+        else:
+            bucket_repo.apply_delta(conn, category, year_month, expense=amount)
+        if category == "salary" and type == "income":
+            distributed = distribute_within(conn, "salary", amount, date, parent_id=txn_id)
+        elif category == "other_income" and type == "income":
+            distributed = transfer_within(conn, "other_income", "savings", amount, date, parent_id=txn_id)
 
         conn.commit()
         return txn_id, distributed

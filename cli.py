@@ -127,14 +127,18 @@ def main():
     args = parser.parse_args()
 
     if args.command == "insert":
-        txn_id, distributed = insert_transaction(
-            amount=args.amount,
-            type=args.type,
-            category=args.category,
-            subcategory=args.subcategory,
-            note=args.note,
-            date=args.date,
-        )
+        try:
+            txn_id, distributed = insert_transaction(
+                amount=args.amount,
+                type=args.type,
+                category=args.category,
+                subcategory=args.subcategory,
+                note=args.note,
+                date=args.date,
+            )
+        except ValueError as e:
+            print(json.dumps({"success": False, "error": str(e)}))
+            sys.exit(1)
         result = {"success": True, "id": txn_id}
         if distributed:
             result["distributions"] = distributed
